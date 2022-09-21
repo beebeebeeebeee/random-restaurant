@@ -1,0 +1,216 @@
+<html>
+<head>
+    <meta charset="utf-8">
+
+    <title><%- title %></title>
+
+    <meta property="og:title" content="<%- title %>">
+    <meta name="twitter:title" content="<%- title %>">
+
+    <meta name="description" content="Today's restaurant: <%- restaurant %>">
+    <meta property="og:description" content="Today's restaurant: <%- restaurant %>">
+    <meta name="twitter:description" content="Today's restaurant: <%- restaurant %>">
+
+    <meta property="og:image"
+          content="<%- publicUrl %>/image/<%- Buffer.from(image.split(",")[1], 'base64').toString('base64url') %>">
+    <meta name="twitter:image"
+          content="<%- publicUrl %>/image/<%- Buffer.from(image.split(",")[1], 'base64').toString('base64url') %>">
+    <link rel="icon" type="image/x-icon" href="<%- image %>">
+
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.1/dist/css/bootstrap.min.css" rel="stylesheet"
+          integrity="sha384-iYQeCzEYFbKjA/T2uDLTpkwGzCiq6soy8tYaI1GyVh/UjpbCx/TYkiZhlZB6+fzT" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.9.1/font/bootstrap-icons.css">
+    <style>
+        .row {
+            margin: 1rem 0;
+        }
+
+        input {
+            width: 15vw;
+            border: none;
+            background: transparent;
+        }
+    </style>
+</head>
+<body>
+<script>
+    const publicUrl = '<%- publicUrl %>'
+    const boardId = '<%- boardId %>'
+    let restaurantList = <%- JSON.stringify(restaurantList) %>;
+
+    function redraw() {
+        // const arg = window.location.pathname.split("/").filter(e => e != '')[publicUrl.split("/").filter(e => e != '').length + 1]
+        window.location.href = `${publicUrl || ''}/boardId/${boardId}/seed/${Math.random().toString().slice(2)}`
+    }
+
+    let editId
+    let isBlur = false
+
+    function edit(id) {
+        isBlur = false
+        // first calling method
+        if (editId == null) {
+            editId = id
+            return
+        }
+
+        // same row, no action
+        if (editId == id) {
+            return;
+        }
+
+        // different row, save changes
+        if (editId != id) {
+
+            updateRestaurant(editId, {
+                restaurant: document.getElementById(`${editId}-restaurant`).value,
+                weight: document.getElementById(`${editId}-weight`).value,
+                peopleLimit: document.getElementById(`${editId}-peopleLimit`).value
+            })
+            editId = id
+        }
+    }
+
+    let timeout
+
+    function inputBlur(id) {
+        isBlur = true
+        if (timeout != null) clearTimeout(timeout)
+        timeout = setTimeout(() => {
+            if (isBlur) {
+                editId = null
+                clearTimeout(timeout)
+                updateRestaurant(id, {
+                    restaurant: document.getElementById(`${id}-restaurant`).value,
+                    weight: document.getElementById(`${id}-weight`).value,
+                    peopleLimit: document.getElementById(`${id}-peopleLimit`).value
+                })
+            }
+        }, 500)
+    }
+
+    function updateTable(id) {
+        if (id == null) {
+            const ele = document.querySelector('#tbody')
+            ele.innerHTML = [...restaurantList.map(e => `
+                <tr>${[...Object.entries(e).map(([k,v])=>{
+                if(!['restaurant', 'weight', 'peopleLimit'].includes(k)) return
+                return `<input value="${v}" onclick="edit(${e.id})" onblur="inputBlur(${e.id})" id="${e.id}-${k}"/>`
+            }).filter(e=>e!=null), `
+                <button type="button" class="btn btn-danger btn-sm" onclick="removeRestaurant(${e.id})">
+                    <i class="bi bi-trash3-fill"></i>
+                </button>
+            `].map(k => `<td>${k}</td>`).join('')}</tr>`), `
+                    <tr>
+                        <td colspan="4">
+                            <button onclick="addRestaurant()" type="button" class="btn btn-primary">
+                                <i class="bi bi-plus"></i>
+                            </button>
+                        </td>
+                    </tr>
+            `].join('')
+        } else {
+            const restaurant = restaurantList.find(e => e.id == id)
+
+            document.getElementById(`${id}-restaurant`).value = restaurant.restaurant
+            document.getElementById(`${id}-weight`).value = restaurant.weight
+            document.getElementById(`${id}-peopleLimit`).value = restaurant.peopleLimit
+        }
+    }
+
+    async function readRestaurantListAndUpdateTable(id) {
+        restaurantList = await fetch(`${publicUrl}/api/boardId/${boardId}`).then(res => res.json())
+        updateTable(id)
+    }
+
+    async function addRestaurant() {
+        await fetch(`${publicUrl}/api/boardId/${boardId}`, {
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            method: "POST",
+            body: JSON.stringify({
+                boardId: boardId,
+                restaurant: "",
+                weight: "",
+                peopleLimit: -1
+            })
+        })
+        await readRestaurantListAndUpdateTable()
+    }
+
+    async function updateRestaurant(id, payload) {
+        await fetch(`${publicUrl}/api/id/${id}`, {
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            method: "PATCH",
+            body: JSON.stringify({boardId, ...payload})
+        })
+        await readRestaurantListAndUpdateTable(id)
+    }
+
+    async function removeRestaurant(id) {
+        await fetch(`${publicUrl}/api/id/${id}`, {
+            method: "DELETE"
+        })
+        await readRestaurantListAndUpdateTable()
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+        updateTable()
+    })
+
+</script>
+
+<div class="container text-center">
+    <div class="row">
+        <div class="col">
+            <button onclick="redraw()" type="button" class="btn btn-primary" style="width: 100%">
+                Re-Draw!
+            </button>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">Today's restaurant:</h5>
+                    <p class="card-text"><%- restaurant %></p>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col">
+            <table class="table table-hover">
+                <thead class="table-light">
+                <tr>
+                    <th>
+                        Restaurant
+                    </th>
+                    <th>
+                        Weight
+                    </th>
+                    <th>
+                        People Limit
+                    </th>
+                    <th>
+                        Action
+                    </th>
+                </tr>
+                </thead>
+                <tbody id="tbody"></tbody>
+            </table>
+        </div>
+    </div>
+
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.1/dist/js/bootstrap.bundle.min.js"
+        integrity="sha384-u1OknCvxWvY5kfmNBILK2hRnQC3Pr17a+RTT6rIHI7NnikvbZlHgTPOOmMi466C8"
+        crossorigin="anonymous"></script>
+
+</body>
+</html>
