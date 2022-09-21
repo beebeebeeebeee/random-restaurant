@@ -3,7 +3,7 @@ import {RestaurantModal} from "../modal/restaurant.modal";
 
 const sqlite3 = verbose()
 
-const database = new sqlite3.Database('./database/database.db');
+const database = new sqlite3.Database('./data/database.db');
 
 database.run(`
     CREATE TABLE IF NOT EXISTS RESTAURANT_DB (
