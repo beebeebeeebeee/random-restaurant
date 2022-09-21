@@ -3,6 +3,7 @@ dotenv.config()
 
 const PORT = process.env.PORT ?? 3000
 
+import './scheduler'
 import * as express from 'express'
 import * as bodyParser from "body-parser"
 import * as localtunnel from 'localtunnel'
@@ -16,7 +17,7 @@ app.set('views engine', 'ejs')
 app.use('/', randomRouter)
 
 app.listen(PORT, async () => {
-    console.log(`service is listening on http://localhost:${PORT}`)
+    console.log(new Date(), `service is listening on http://localhost:${PORT}`)
 
     if (process.env.NODE_ENV === "development") {
         const tunnel = await localtunnel({
@@ -24,7 +25,7 @@ app.listen(PORT, async () => {
             host: 'https://lt.beebeebeeebeee.com',
             subdomain: 'random-restaurant'
         });
-        console.log(`service is listening on ${tunnel.url}`);
+        console.log(new Date(), `service is listening on ${tunnel.url}`);
     }
 })
 

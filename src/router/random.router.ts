@@ -3,24 +3,12 @@ import * as seedrandom from "seedrandom";
 import {createRestaurant, database, deleteRestaurant, getRestaurantList, updateRestaurant} from "../database";
 import {RestaurantModal} from "../modal/restaurant.modal";
 import {generateImage} from "../util/generate.image";
+import axios from "axios";
+import {sendTeamsMessage} from "../util/team.message";
+import {getRandomRestaurant} from "../service";
 
+const publicUrl = process.env.PUBLIC_URL || ''
 const router = express.Router()
-
-async function getRandomRestaurant(boardId: string, seed: string, isWeighted: boolean): Promise<[RestaurantModal[], number]> {
-    const restaurantList = await getRestaurantList(boardId)
-    if(restaurantList.length == 0) return [[], 0]
-
-    let index: number
-    if (isWeighted) {
-        const total = restaurantList.reduce((p, c) => p + c.weight, 0)
-        const cdf = restaurantList.map(e => e.weight).map((sum => value => sum += value / total)(0))
-        index = cdf.filter(el => seedrandom(seed)() >= el).length
-    } else {
-        index = Math.floor(seedrandom(seed)() * restaurantList.length)
-    }
-
-    return [restaurantList, index]
-}
 
 router.get("/", (req, res) => {
     return res.redirect(`${process.env.PUBLIC_URL ?? ''}/boardId/1/seed/${Math.random().toString().slice(2)}`)
@@ -93,8 +81,9 @@ router.get("/boardId/:boardId/seed/:seed", async (req, res) => {
     const [restaurantList, index] = await getRandomRestaurant(boardId, seed, true)
 
     const restaurant = restaurantList[index]?.restaurant || ''
+
     return res.render('index.ejs', {
-        publicUrl: process.env.PUBLIC_URL || '',
+        publicUrl,
         image: generateImage(restaurant),
         title: `Random Restaurant! - ${restaurant}`,
         boardId,
