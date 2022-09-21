@@ -24,7 +24,6 @@
     "localtunnel": "^2.0.2",
     "seedrandom": "^3.0.5",
     "sqlite3": "^5.1.1",
-    "text-to-image": "^5.2.0",
     "ultimate-text-to-image": "^1.0.0"
   }
 }

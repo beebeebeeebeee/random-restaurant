@@ -337,7 +337,7 @@ call-bind@^1.0.0:
     function-bind "^1.1.1"
     get-intrinsic "^1.0.2"
 
-canvas@^2.6.0, canvas@^2.6.1:
+canvas@^2.6.1:
   version "2.10.1"
   resolved "https://registry.yarnpkg.com/canvas/-/canvas-2.10.1.tgz#fbfd4b1b3b106c3454481d79d363ebadf8811c08"
   integrity sha512-29pIjn9uwTUsIgJUNd7GXxKk8sg4iyJwLm1wIilNIqX1mVzXSc2nUij9exW1LqNpis1d2ebMYfMqTWcokZ4pdA==
@@ -1386,13 +1386,6 @@ tar@^6.0.2, tar@^6.1.11, tar@^6.1.2:
     minizlib "^2.1.1"
     mkdirp "^1.0.3"
     yallist "^4.0.0"
-
-text-to-image@^5.2.0:
-  version "5.2.0"
-  resolved "https://registry.yarnpkg.com/text-to-image/-/text-to-image-5.2.0.tgz#7fd657fd0000603ebc1bc9cb4e022e490874020e"
-  integrity sha512-J6PH9zwMXA3M+QUpxDOOgo8NWYKav6CwFtd5B7wJd9C6iDBPZiD6OX1pyV9ZxnVrOivAevqqkmOcMXPXjFkI+A==
-  dependencies:
-    canvas "^2.6.0"
 
 tiny-inflate@^1.0.0:
   version "1.0.3"

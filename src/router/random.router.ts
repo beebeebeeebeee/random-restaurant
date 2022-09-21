@@ -2,13 +2,12 @@ import * as express from 'express'
 import * as seedrandom from "seedrandom";
 import {createRestaurant, database, deleteRestaurant, getRestaurantList, updateRestaurant} from "../database";
 import {RestaurantModal} from "../modal/restaurant.modal";
-import {generate} from "text-to-image";
-import {getCanvasImage, HorizontalImage, registerFont, UltimateTextToImage, VerticalImage} from "ultimate-text-to-image";
+import {generateImage} from "../util/generate.image";
 
 const router = express.Router()
 
-async function getRandomRestaurant(seed: string, isWeighted: boolean): Promise<[RestaurantModal[], number]> {
-    const restaurantList = await getRestaurantList()
+async function getRandomRestaurant(boardId: string, seed: string, isWeighted: boolean): Promise<[RestaurantModal[], number]> {
+    const restaurantList = await getRestaurantList(boardId)
 
     let index: number
     if (isWeighted) {
@@ -23,25 +22,29 @@ async function getRandomRestaurant(seed: string, isWeighted: boolean): Promise<[
 }
 
 router.get("/", (req, res) => {
-    return res.redirect(`${process.env.PUBLIC_URL ?? ''}/${Math.random().toString().slice(2)}`)
+    return res.redirect(`${process.env.PUBLIC_URL ?? ''}/boardId/1/seed/${Math.random().toString().slice(2)}`)
 })
 
 /**
  * Get All Restaurant
  */
-router.get('/api', async (req, res) => {
-    return res.send(await getRestaurantList())
+router.get('/api/boardId/:boardId', async (req, res) => {
+    const {boardId} = req.params
+    return res.send(await getRestaurantList(boardId))
 })
 
 /**
  * Add New Restaurant
  */
-router.post('/api', async (req, res) => {
+router.post('/api/boardId/:boardId', async (req, res) => {
+    const {boardId} = req.params
     const payload = {
+        boardId: req.body.boardId,
         restaurant: req.body.restaurant,
-        weight: req.body.weight
+        weight: req.body.weight,
+        peopleLimit: req.body.peopleLimit
     }
-    if (payload.restaurant == null || payload.weight == null) return res.status(400).send()
+    if (payload.boardId == null || payload.restaurant == null || payload.weight == null) return res.status(400).send()
 
     await createRestaurant(payload)
     return res.send()
@@ -50,13 +53,15 @@ router.post('/api', async (req, res) => {
 /**
  * Update Restaurant
  */
-router.patch('/api/:id', async (req, res) => {
+router.patch('/api/id/:id', async (req, res) => {
     const {id} = req.params
     const payload = {
+        boardId: req.body.boardId,
         restaurant: req.body.restaurant,
-        weight: req.body.weight
+        weight: req.body.weight,
+        peopleLimit: req.body.peopleLimit
     }
-    if (payload.restaurant == null || payload.weight == null) return res.status(400).send()
+    if (payload.boardId == null || payload.restaurant == null || payload.weight == null || payload.peopleLimit == null) return res.status(400).send()
 
     await updateRestaurant(id, payload)
     return res.send()
@@ -65,7 +70,7 @@ router.patch('/api/:id', async (req, res) => {
 /**
  * Delete Restaurant
  */
-router.delete('/api/:id', async (req, res) => {
+router.delete('/api/id/:id', async (req, res) => {
     const {id} = req.params
     await deleteRestaurant(id)
     return res.send()
@@ -81,34 +86,21 @@ router.get("/image/:image(*)", (req, res) => {
     res.end(img);
 })
 
-async function seedHandlers(req, res, isWeighted) {
-    const {seed} = req.params
-    const [restaurantList, index] = await getRandomRestaurant(seed, isWeighted)
+router.get("/boardId/:boardId/seed/:seed", async (req, res) => {
+    const {boardId, seed} = req.params
+    const {} = req.query
+    const [restaurantList, index] = await getRandomRestaurant(boardId, seed, true)
+
+    const restaurant = restaurantList[index].restaurant
     return res.render('index.ejs', {
         publicUrl: process.env.PUBLIC_URL || '',
-        image: new UltimateTextToImage(restaurantList[index].restaurant, {
-            width: 128,
-            height: 128,
-            fontFamily: "Arial, Sans",
-            fontColor: "#000000",
-            fontSize: 16,
-            minFontSize: 16,
-            lineHeight: 16,
-            autoWrapLineHeightMultiplier: 1.2,
-            margin: 20,
-            align: "center",
-            valign: "middle",
-            backgroundColor: "#FFFFFF",
-        }).render().toDataUrl(),
-        title: `Random Restaurant! - ${restaurantList[index].restaurant}`,
-        restaurant: restaurantList[index].restaurant,
-        restaurantList: restaurantList
+        image: generateImage(restaurant),
+        title: `Random Restaurant! - ${restaurant}`,
+        boardId,
+        restaurant,
+        restaurantList
     });
-}
-
-router.get("/:seed", (req, res) => seedHandlers(req, res, true))
-router.get("/:seed/--no-weight", (req, res) => seedHandlers(req, res, false))
-
+})
 
 
 export default router
