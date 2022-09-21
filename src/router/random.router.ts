@@ -1,10 +1,6 @@
 import * as express from 'express'
-import * as seedrandom from "seedrandom";
-import {createRestaurant, database, deleteRestaurant, getRestaurantList, updateRestaurant} from "../database";
-import {RestaurantModal} from "../modal/restaurant.modal";
-import {generateImage} from "../util/generate.image";
-import axios from "axios";
-import {sendTeamsMessage} from "../util/team.message";
+import {createRestaurant, deleteRestaurant, getRestaurantList, updateRestaurant} from "../database";
+import {generateImage} from "../util";
 import {getRandomRestaurant} from "../service";
 
 const publicUrl = process.env.PUBLIC_URL || ''

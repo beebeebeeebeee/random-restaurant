@@ -1,5 +1,5 @@
 import {verbose} from "sqlite3";
-import {RestaurantModal} from "../modal/restaurant.modal";
+import {RestaurantType} from "../type/restaurant.type";
 
 const sqlite3 = verbose()
 
@@ -19,7 +19,7 @@ database.run(`
     );
 `)
 
-export async function getRestaurantList(boardId: string): Promise<RestaurantModal[]> {
+export async function getRestaurantList(boardId: string): Promise<RestaurantType[]> {
     const result: any[] = await new Promise((resolve, reject) => {
         const result: any[] = []
         database.each('SELECT * FROM RESTAURANT_DB WHERE board_id = ?',
@@ -34,7 +34,7 @@ export async function getRestaurantList(boardId: string): Promise<RestaurantModa
             })
     })
     return result.map(e=> {
-        const payload : RestaurantModal = {
+        const payload : RestaurantType = {
             id: e.id,
             boardId: e.board_id,
             restaurant: e.restaurant,
@@ -45,7 +45,7 @@ export async function getRestaurantList(boardId: string): Promise<RestaurantModa
     })
 }
 
-export async function createRestaurant(payload: RestaurantModal): Promise<boolean> {
+export async function createRestaurant(payload: RestaurantType): Promise<boolean> {
     return await new Promise((resolve, reject) => {
         database.run("INSERT INTO RESTAURANT_DB (board_id, restaurant, weight, people_limit) VALUES (?, ?, ?, ?)",
             [payload.boardId, payload.restaurant, payload.weight, payload.peopleLimit],
@@ -57,7 +57,7 @@ export async function createRestaurant(payload: RestaurantModal): Promise<boolea
     })
 }
 
-export async function updateRestaurant(id: string, payload: RestaurantModal): Promise<boolean> {
+export async function updateRestaurant(id: string, payload: RestaurantType): Promise<boolean> {
     return await new Promise((resolve, reject) => {
         database.run("UPDATE RESTAURANT_DB SET restaurant = ?, weight = ?, people_limit = ? WHERE id = ?",
             [payload.restaurant, payload.weight, payload.peopleLimit, id],

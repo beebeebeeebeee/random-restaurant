@@ -1,4 +1,4 @@
-export interface RestaurantModal {
+export interface RestaurantType {
     id?: number
     boardId: number
     restaurant: string
