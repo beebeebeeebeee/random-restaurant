@@ -19,7 +19,7 @@ if (CRON_EXP != null) {
 
         await sendTeamsMessage(
             restaurant,
-            `${domain}${publicUrl}/image/${boardId}/seed/${seed}`,
+            `${domain}${publicUrl}/image/boardId/${boardId}/seed/${seed}`,
             `${domain}${publicUrl}/boardId/${boardId}/seed/${seed}`
         )
     });
