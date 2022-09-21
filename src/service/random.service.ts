@@ -1,8 +1,8 @@
-import {RestaurantModal} from "../modal/restaurant.modal";
+import {RestaurantType} from "../type";
 import {getRestaurantList} from "../database";
 import * as seedrandom from "seedrandom";
 
-export async function getRandomRestaurant(boardId: string, seed: string, isWeighted: boolean): Promise<[RestaurantModal[], number]> {
+export async function getRandomRestaurant(boardId: string, seed: string, isWeighted: boolean): Promise<[RestaurantType[], number]> {
     const restaurantList = await getRestaurantList(boardId)
     if (restaurantList.length == 0) return [[], 0]
 
