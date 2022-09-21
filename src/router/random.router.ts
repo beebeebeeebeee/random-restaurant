@@ -8,6 +8,7 @@ const router = express.Router()
 
 async function getRandomRestaurant(boardId: string, seed: string, isWeighted: boolean): Promise<[RestaurantModal[], number]> {
     const restaurantList = await getRestaurantList(boardId)
+    if(restaurantList.length == 0) return [[], 0]
 
     let index: number
     if (isWeighted) {
@@ -91,7 +92,7 @@ router.get("/boardId/:boardId/seed/:seed", async (req, res) => {
     const {} = req.query
     const [restaurantList, index] = await getRandomRestaurant(boardId, seed, true)
 
-    const restaurant = restaurantList[index].restaurant
+    const restaurant = restaurantList[index]?.restaurant || ''
     return res.render('index.ejs', {
         publicUrl: process.env.PUBLIC_URL || '',
         image: generateImage(restaurant),
