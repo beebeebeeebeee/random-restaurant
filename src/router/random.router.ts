@@ -3,11 +3,12 @@ import {createRestaurant, deleteRestaurant, getRestaurantList, updateRestaurant}
 import {generateImage} from "../util";
 import {getRandomRestaurant} from "../service";
 
+const domain = process.env.DOMAIN || ''
 const publicUrl = process.env.PUBLIC_URL || ''
 const router = express.Router()
 
 router.get("/", (req, res) => {
-    return res.redirect(`${process.env.PUBLIC_URL ?? ''}/boardId/1/seed/${Math.random().toString().slice(2)}`)
+    return res.redirect(`${domain}${publicUrl}/boardId/1/seed/${Math.random().toString().slice(2)}`)
 })
 
 /**
@@ -61,13 +62,18 @@ router.delete('/api/id/:id', async (req, res) => {
     return res.send()
 })
 
-router.get("/image/:image(*)", (req, res) => {
-    const img = Buffer.from(req.params.image, 'base64url');
+router.get("/image/boardId/:boardId/seed/:seed", async (req, res) => {
+    const {boardId, seed} = req.params
+    const {} = req.query
+    const [restaurantList, index] = await getRandomRestaurant(boardId, seed, true)
+
+    const restaurant = restaurantList[index]?.restaurant || ''
+
+    const img = Buffer.from(generateImage(restaurant).split(',')[1], 'base64');
     res.writeHead(200, {
         'Content-Type': 'image/png',
         'Content-Length': img.length
     });
-
     res.end(img);
 })
 
@@ -80,9 +86,10 @@ router.get("/boardId/:boardId/seed/:seed", async (req, res) => {
 
     return res.render('index.ejs', {
         publicUrl,
+        boardId,
+        seed,
         image: generateImage(restaurant),
         title: `Random Restaurant! - ${restaurant}`,
-        boardId,
         restaurant,
         restaurantList
     });

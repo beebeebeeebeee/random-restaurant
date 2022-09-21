@@ -15,12 +15,11 @@ if (CRON_EXP != null) {
         const seed = Math.random().toString().slice(2)
         const [restaurantList, index] = await getRandomRestaurant(boardId, seed, true)
         const restaurant = restaurantList[index]?.restaurant || ''
-        const image = generateImage(restaurant)
         const publicUrl = process.env.PUBLIC_URL || ''
 
         await sendTeamsMessage(
             restaurant,
-            `${domain}${publicUrl}/image/${Buffer.from(image.split(",")[1], 'base64').toString('base64url')}`,
+            `${domain}${publicUrl}/image/${boardId}/seed/${seed}`,
             `${domain}${publicUrl}/boardId/${boardId}/seed/${seed}`
         )
     });
