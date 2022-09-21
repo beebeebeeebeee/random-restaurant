@@ -4,5 +4,6 @@ dist
 .vscode
 .idea
 
+data
 *.db
 .env
