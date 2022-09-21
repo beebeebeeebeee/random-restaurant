@@ -1,7 +1,6 @@
 import * as cron from 'node-cron'
-import {generateImage, isHoliday, sendTeamsMessage} from "../util";
+import {generateImage, isHoliday, sendTeamsMessage, isWeekday} from "../util";
 import {getRandomRestaurant} from "../service";
-import {isWeekday} from "../util/is.weekday";
 
 const domain = process.env.DOMAIN || ''
 const CRON_EXP = process.env.CRON_EXP
