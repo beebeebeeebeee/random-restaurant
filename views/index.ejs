@@ -120,12 +120,12 @@
     }
 
     async function readRestaurantListAndUpdateTable(id) {
-        restaurantList = await fetch(`/api/boardId/${boardId}`).then(res => res.json())
+        restaurantList = await fetch(`${publicUrl}/api/boardId/${boardId}`).then(res => res.json())
         updateTable(id)
     }
 
     async function addRestaurant() {
-        await fetch(`/api/boardId/${boardId}`, {
+        await fetch(`${publicUrl}/api/boardId/${boardId}`, {
             headers: {
                 'Content-Type': 'application/json'
             },
@@ -141,7 +141,7 @@
     }
 
     async function updateRestaurant(id, payload) {
-        await fetch(`/api/id/${id}`, {
+        await fetch(`${publicUrl}/api/id/${id}`, {
             headers: {
                 'Content-Type': 'application/json'
             },
@@ -152,7 +152,7 @@
     }
 
     async function removeRestaurant(id) {
-        await fetch(`/api/id/${id}`, {
+        await fetch(`${publicUrl}/api/id/${id}`, {
             method: "DELETE"
         })
         await readRestaurantListAndUpdateTable()
