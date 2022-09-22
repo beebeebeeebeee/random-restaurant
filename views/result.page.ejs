@@ -12,9 +12,9 @@
     <meta name="twitter:description" content="Today's restaurant: <%- restaurant %>">
 
     <meta property="og:image"
-          content="<%- publicUrl %>/image/boardId/<%- boardId %>/seed/<%- seed %>">
+          content="<%- publicUrl %>/image/boardId/<%- boardId %>/seed/<%- seed %>/<%- search.replace('?','') %>">
     <meta name="twitter:image"
-          content="<%- publicUrl %>/image/boardId/<%- boardId %>/seed/<%- seed %>">
+          content="<%- publicUrl %>/image/boardId/<%- boardId %>/seed/<%- seed %>/<%- search.replace('?','') %>">
     <link rel="icon" type="image/x-icon" href="<%- image %>">
 
     <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -40,46 +40,45 @@
     let restaurantList = <%- JSON.stringify(restaurantList) %>;
 
     function redraw() {
-        // const arg = window.location.pathname.split("/").filter(e => e != '')[publicUrl.split("/").filter(e => e != '').length + 1]
-        window.location.href = `${publicUrl || ''}/boardId/${boardId}/seed/${Math.random().toString().slice(2)}`
+        window.location.href = `${publicUrl || ''}/boardId/${boardId}/seed/${Math.random().toString().slice(2)}${window.location.search}`
     }
 
-    let editId
-    let isBlur = false
+    let restaurantTableOnEditId
+    let isRestaurantTableInputFocusOut = false
 
-    function edit(id) {
-        isBlur = false
+    function restaurantTableOnEdit(id) {
+        isRestaurantTableInputFocusOut = false
         // first calling method
-        if (editId == null) {
-            editId = id
+        if (restaurantTableOnEditId == null) {
+            restaurantTableOnEditId = id
             return
         }
 
         // same row, no action
-        if (editId == id) {
+        if (restaurantTableOnEditId == id) {
             return;
         }
 
         // different row, save changes
-        if (editId != id) {
+        if (restaurantTableOnEditId != id) {
 
-            updateRestaurant(editId, {
-                restaurant: document.getElementById(`${editId}-restaurant`).value,
-                weight: document.getElementById(`${editId}-weight`).value,
-                peopleLimit: document.getElementById(`${editId}-peopleLimit`).value
+            updateRestaurant(restaurantTableOnEditId, {
+                restaurant: document.getElementById(`${restaurantTableOnEditId}-restaurant`).value,
+                weight: document.getElementById(`${restaurantTableOnEditId}-weight`).value,
+                peopleLimit: document.getElementById(`${restaurantTableOnEditId}-peopleLimit`).value
             })
-            editId = id
+            restaurantTableOnEditId = id
         }
     }
 
     let blurTimeout
 
     function inputBlur(id) {
-        isBlur = true
+        isRestaurantTableInputFocusOut = true
         if (blurTimeout != null) clearTimeout(blurTimeout)
         blurTimeout = setTimeout(async () => {
-            if (isBlur) {
-                editId = null
+            if (isRestaurantTableInputFocusOut) {
+                restaurantTableOnEditId = null
                 await updateRestaurant(id, {
                     restaurant: document.getElementById(`${id}-restaurant`).value,
                     weight: document.getElementById(`${id}-weight`).value,
@@ -92,13 +91,13 @@
         }, 500)
     }
 
-    function updateTable(id) {
+    function updateRestaurantTable(id) {
         if (id == null) {
             const ele = document.querySelector('#tbody')
             ele.innerHTML = [...restaurantList.map(e => `
                 <tr>${[...Object.entries(e).map(([k, v]) => {
                 if (!['restaurant', 'weight', 'peopleLimit'].includes(k)) return
-                return `<input value="${v}" onclick="edit(${e.id})" onblur="inputBlur(${e.id})" id="${e.id}-${k}"/>`
+                return `<input value="${v}" onclick="restaurantTableOnEdit(${e.id})" onblur="inputBlur(${e.id})" id="${e.id}-${k}"/>`
             }).filter(e => e != null), `
                 <button type="button" class="btn btn-danger btn-sm" onclick="removeRestaurant(${e.id})">
                     <i class="bi bi-trash3-fill"></i>
@@ -123,7 +122,7 @@
 
     async function readRestaurantListAndUpdateTable(id) {
         restaurantList = await fetch(`${publicUrl}/api/boardId/${boardId}`).then(res => res.json())
-        updateTable(id)
+        updateRestaurantTable(id)
     }
 
     async function addRestaurant() {
@@ -175,7 +174,7 @@
     }
 
     document.addEventListener('DOMContentLoaded', () => {
-        updateTable()
+        updateRestaurantTable()
     })
 
 </script>
