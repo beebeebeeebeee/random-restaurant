@@ -12,9 +12,9 @@
     <meta name="twitter:description" content="Today's restaurant: <%- restaurant %>">
 
     <meta property="og:image"
-          content="<%- publicUrl %>/image/boardId/<%- boardId %>/seed/<%- seed %>">
+          content="<%- publicUrl %>/image/boardId/<%- boardId %>/seed/<%- seed %>/<%- search.replace('?','') %>">
     <meta name="twitter:image"
-          content="<%- publicUrl %>/image/boardId/<%- boardId %>/seed/<%- seed %>">
+          content="<%- publicUrl %>/image/boardId/<%- boardId %>/seed/<%- seed %>/<%- search.replace('?','') %>">
     <link rel="icon" type="image/x-icon" href="<%- image %>">
 
     <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -40,8 +40,7 @@
     let restaurantList = <%- JSON.stringify(restaurantList) %>;
 
     function redraw() {
-        // const arg = window.location.pathname.split("/").filter(e => e != '')[publicUrl.split("/").filter(e => e != '').length + 1]
-        window.location.href = `${publicUrl || ''}/boardId/${boardId}/seed/${Math.random().toString().slice(2)}`
+        window.location.href = `${publicUrl || ''}/boardId/${boardId}/seed/${Math.random().toString().slice(2)}${window.location.search}`
     }
 
     let editId

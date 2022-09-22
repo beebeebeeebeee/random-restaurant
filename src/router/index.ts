@@ -1,1 +1,2 @@
-export * from './random.router'
+export * from './view.router'
+export * from './api.router'
