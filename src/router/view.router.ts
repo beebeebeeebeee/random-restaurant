@@ -24,8 +24,8 @@ async function getRandomRestaurantByRequest(req): Promise<[RestaurantType[], str
     return [restaurantList, indexes.map(index => restaurantList[index].restaurant).join(', ')]
 }
 
-ViewRouter.get("/image/boardId/:boardId/seed/:seed/:query", async (req, res) => {
-    const {query} = req.params
+async function routeImage(req, res){
+    const query = req.params.query || ''
     req.query = Object.fromEntries(query.split('&').map((el: string) => el.split("=")))
     const [_, restaurantResultList] = await getRandomRestaurantByRequest(req)
 
@@ -35,7 +35,10 @@ ViewRouter.get("/image/boardId/:boardId/seed/:seed/:query", async (req, res) => 
         'Content-Length': img.length
     });
     res.end(img);
-})
+}
+
+ViewRouter.get("/image/boardId/:boardId/seed/:seed", routeImage)
+ViewRouter.get("/image/boardId/:boardId/seed/:seed/:query", routeImage)
 
 ViewRouter.get("/boardId/:boardId/seed/:seed", async (req, res) => {
     const {boardId, seed} = req.params
