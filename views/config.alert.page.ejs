@@ -2,20 +2,7 @@
 <head>
     <meta charset="utf-8">
 
-    <title><%- title %></title>
-
-    <meta property="og:title" content="<%- title %>">
-    <meta name="twitter:title" content="<%- title %>">
-
-    <meta name="description" content="Today's restaurant: <%- restaurant %>">
-    <meta property="og:description" content="Today's restaurant: <%- restaurant %>">
-    <meta name="twitter:description" content="Today's restaurant: <%- restaurant %>">
-
-    <meta property="og:image"
-          content="<%- publicUrl %>/image/boardId/<%- boardId %>/seed/<%- seed %>/<%- search.replace('?','') %>">
-    <meta name="twitter:image"
-          content="<%- publicUrl %>/image/boardId/<%- boardId %>/seed/<%- seed %>/<%- search.replace('?','') %>">
-    <link rel="icon" type="image/x-icon" href="<%- image %>">
+    <title>Alert Config</title>
 
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.1/dist/css/bootstrap.min.css" rel="stylesheet"
@@ -26,7 +13,11 @@
             margin: 1rem 0;
         }
 
-        input {
+        .form-group {
+            margin-bottom: 1rem;
+        }
+
+        #tbody input {
             width: 15vw;
             border: none;
             background: transparent;
@@ -35,12 +26,50 @@
 </head>
 <body>
 <script>
-    const publicUrl = '<%- publicUrl %>'
-    const boardId = '<%- boardId %>'
-    let restaurantList = <%- JSON.stringify(restaurantList) %>;
+    const publicUrl = '<%- publicUrl %>';
+    const alertId = <%- result.id %>;
+    let result = <%- JSON.stringify(result) %>;
+    let restaurantList = []
 
-    function redraw() {
-        window.location.href = `${publicUrl || ''}/boardId/${boardId}/seed/${Math.random().toString().slice(2)}${window.location.search}`
+    function displayConfigTable() {
+        document.getElementById('boardId').value = result.boardId
+        document.getElementById('dailyPeopleSize').value = result.dailyPeopleSize
+        document.getElementById('numberOfRandom').value = result.numberOfRandom
+        document.getElementById('notifyTime').value = result.notifyTime?.substring(0, 5) || ''
+        document.getElementById('scheduleTime').value = result.scheduleTime?.substring(0, 5) || ''
+        document.getElementById('scheduleEnableWeekdayOnly').checked = result.scheduleEnableWeekdayOnly
+        document.getElementById('scheduleEnableNotHoliday').checked = result.scheduleEnableNotHoliday
+    }
+
+    async function apiGetConfig() {
+        result = await fetch(`${publicUrl}/api/alertId/${alertId}`).then(res => res.json())
+    }
+
+    async function getNewConfigAndDisplayConfigTable(){
+        await apiGetConfig()
+        await readRestaurantListAndUpdateTable()
+        displayConfigTable()
+    }
+
+    async function updateConfigTable(id) {
+        const payload = {
+            id: alertId,
+            boardId: document.getElementById('boardId').value,
+            dailyPeopleSize: document.getElementById('dailyPeopleSize').value,
+            numberOfRandom: document.getElementById('numberOfRandom').value,
+            notifyTime: document.getElementById('notifyTime').value == '' ? null : document.getElementById('notifyTime').value + ":00",
+            scheduleTime: document.getElementById('scheduleTime').value == '' ? null : document.getElementById('scheduleTime').value + ":00",
+            scheduleEnableWeekdayOnly: document.getElementById('scheduleEnableWeekdayOnly').checked,
+            scheduleEnableNotHoliday: document.getElementById('scheduleEnableNotHoliday').checked
+        }
+        await fetch(`${publicUrl}/api/alertId/${alertId}`, {
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            method: "PATCH",
+            body: JSON.stringify(payload)
+        })
+        await getNewConfigAndDisplayConfigTable(id)
     }
 
     let restaurantTableOnEditId
@@ -91,7 +120,7 @@
         }, 500)
     }
 
-    function updateRestaurantTable(id) {
+    function displayRestaurantTable(id) {
         if (id == null) {
             const ele = document.querySelector('#tbody')
             ele.innerHTML = [...restaurantList.map(e => `
@@ -121,8 +150,8 @@
     }
 
     async function readRestaurantListAndUpdateTable(id) {
-        restaurantList = await fetch(`${publicUrl}/api/boardId/${boardId}`).then(res => res.json())
-        updateRestaurantTable(id)
+        restaurantList = await fetch(`${publicUrl}/api/boardId/${result.boardId}`).then(res => res.json())
+        displayRestaurantTable(id)
     }
 
     async function addRestaurant() {
@@ -173,30 +202,69 @@
         await readRestaurantListAndUpdateTable()
     }
 
-    document.addEventListener('DOMContentLoaded', () => {
-        updateRestaurantTable()
+    document.addEventListener('DOMContentLoaded', async () => {
+        displayConfigTable()
+        await readRestaurantListAndUpdateTable()
     })
 
 </script>
 
-<div class="container text-center">
+<div class="container">
     <div class="row">
         <div class="col">
-            <button onclick="redraw()" type="button" class="btn btn-primary" style="width: 100%">
-                Re-Draw!
-            </button>
-        </div>
-    </div>
-    <div class="row">
-        <div class="col">
-            <div class="card">
+            <div class="card text-center">
                 <div class="card-body">
-                    <h5 class="card-title">Today's restaurant:</h5>
-                    <p class="card-text"><%- restaurant %></p>
+                    <h5 class="card-title">Alert Config:</h5>
+                    <p class="card-text">Alert ID: <%- result.id %></p>
                 </div>
             </div>
         </div>
     </div>
+    <div class="row">
+        <div class="col">
+            <form>
+                <div class="form-group">
+                    <label for="boardId">Board Id</label>
+                    <input type="number" class="form-control" id="boardId" onblur="updateConfigTable('boardId')">
+                </div>
+                <div class="form-group">
+                    <label for="dailyPeopleSize">Daily People Size</label>
+                    <input type="number" class="form-control" id="dailyPeopleSize" onblur="updateConfigTable('dailyPeopleSize')">
+                </div>
+                <div class="form-group">
+                    <label for="numberOfRandom">Number Of Random</label>
+                    <input type="number" class="form-control" id="numberOfRandom" onblur="updateConfigTable('numberOfRandom')">
+                </div>
+                <div class="form-group">
+                    <label for="notifyTime">Notify Time</label>
+                    <input type="time" class="form-control" id="notifyTime" onblur="updateConfigTable('notifyTime')">
+                </div>
+                <div class="form-group">
+                    <label for="scheduleTime">Schedule Time</label>
+                    <input type="time" class="form-control" id="scheduleTime" onblur="updateConfigTable('scheduleTime')">
+                </div>
+                <div class="form-group">
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" id="scheduleEnableWeekdayOnly"
+                               onclick="updateConfigTable('scheduleEnableWeekdayOnly')">
+                        <label class="form-check-label" for="scheduleEnableWeekdayOnly">
+                            Enable Weekday Only
+                        </label>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" id="scheduleEnableNotHoliday"
+                               onclick="updateConfigTable('scheduleEnableNotHoliday')"
+                        <label class="form-check-label" for="scheduleEnableNotHoliday">
+                            Enable Not Holiday
+                        </label>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+
     <div class="row">
         <div class="col">
             <table class="table table-hover">

@@ -2,7 +2,7 @@ import axios from "axios";
 
 const teamsUrl = process.env.TEAMS_URL
 
-export async function sendTeamsMessage(restaurant, imageUrl, pageUrl){
+export async function sendTeamsMessage(restaurant, imageUrl, pageUrl) {
     const data = {
         "type": "message",
         "attachments": [
@@ -10,11 +10,10 @@ export async function sendTeamsMessage(restaurant, imageUrl, pageUrl){
                 "contentType": "application/vnd.microsoft.card.hero",
                 "content": {
                     "title": `Today's restaurant: ${restaurant}`,
-                    "images": [
+                    "images": imageUrl == null ? [] : [
                         {
                             "url": imageUrl
-                        }
-                    ],
+                        }],
                     "buttons": [
                         {
                             "type": "openUrl",
@@ -26,5 +25,5 @@ export async function sendTeamsMessage(restaurant, imageUrl, pageUrl){
             }
         ]
     }
-    const result = await axios.post(teamsUrl,data)
+    const result = await axios.post(teamsUrl, data)
 }
