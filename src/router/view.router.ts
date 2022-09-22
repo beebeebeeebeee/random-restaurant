@@ -2,6 +2,7 @@ import * as express from 'express'
 import {generateImage} from "../util";
 import {getRandomRestaurant} from "../service";
 import {RestaurantType} from "../type";
+import {getAlertById} from "../service/alert.service";
 
 const domain = process.env.DOMAIN || ''
 const publicUrl = process.env.PUBLIC_URL || ''
@@ -9,6 +10,15 @@ const ViewRouter = express.Router()
 
 ViewRouter.get("/", (req, res) => {
     return res.redirect(`${domain}${publicUrl}/boardId/1/seed/${Math.random().toString().slice(2)}`)
+})
+
+ViewRouter.get("/config/alertId/:alertId", async (req, res)=>{
+    const {alertId} = req.params
+    const result = await getAlertById(alertId)
+    return res.render('config.alert.page.ejs', {
+        publicUrl,
+        result
+    });
 })
 
 /**
@@ -21,7 +31,7 @@ async function getRandomRestaurantByRequest(req): Promise<[RestaurantType[], str
         times?: string
     }
     const [restaurantList, indexes] = await getRandomRestaurant(boardId, seed, true, times != null ? parseInt(times) : undefined)
-    return [restaurantList, indexes.map(index => restaurantList[index].restaurant).join(', ')]
+    return [restaurantList, indexes.map(index => restaurantList[index]?.restaurant).join(', ')]
 }
 
 async function routeImage(req, res){

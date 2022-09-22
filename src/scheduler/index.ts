@@ -1,1 +1,1 @@
-export * from './daily.random.corn'
+export * from './alert.cron'

@@ -3,7 +3,7 @@ dotenv.config()
 
 const PORT = process.env.PORT ?? 3000
 
-import './scheduler'
+import {startAlertCron} from './scheduler'
 import * as express from 'express'
 import * as bodyParser from "body-parser"
 import * as localtunnel from 'localtunnel'
@@ -28,6 +28,8 @@ app.listen(PORT, async () => {
         });
         console.log(new Date(), `service is listening on ${tunnel.url}`);
     }
+
+    startAlertCron()
 })
 
 
