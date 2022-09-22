@@ -72,20 +72,22 @@
         }
     }
 
-    let timeout
+    let blurTimeout
 
     function inputBlur(id) {
         isBlur = true
-        if (timeout != null) clearTimeout(timeout)
-        timeout = setTimeout(() => {
+        if (blurTimeout != null) clearTimeout(blurTimeout)
+        blurTimeout = setTimeout(async () => {
             if (isBlur) {
                 editId = null
-                clearTimeout(timeout)
-                updateRestaurant(id, {
+                await updateRestaurant(id, {
                     restaurant: document.getElementById(`${id}-restaurant`).value,
                     weight: document.getElementById(`${id}-weight`).value,
                     peopleLimit: document.getElementById(`${id}-peopleLimit`).value
                 })
+
+                clearTimeout(blurTimeout)
+                blurTimeout = null
             }
         }, 500)
     }
@@ -94,10 +96,10 @@
         if (id == null) {
             const ele = document.querySelector('#tbody')
             ele.innerHTML = [...restaurantList.map(e => `
-                <tr>${[...Object.entries(e).map(([k,v])=>{
-                if(!['restaurant', 'weight', 'peopleLimit'].includes(k)) return
+                <tr>${[...Object.entries(e).map(([k, v]) => {
+                if (!['restaurant', 'weight', 'peopleLimit'].includes(k)) return
                 return `<input value="${v}" onclick="edit(${e.id})" onblur="inputBlur(${e.id})" id="${e.id}-${k}"/>`
-            }).filter(e=>e!=null), `
+            }).filter(e => e != null), `
                 <button type="button" class="btn btn-danger btn-sm" onclick="removeRestaurant(${e.id})">
                     <i class="bi bi-trash3-fill"></i>
                 </button>
@@ -125,6 +127,20 @@
     }
 
     async function addRestaurant() {
+        if (blurTimeout != null) {
+            await new Promise((resolve) => {
+                let intervalTimeout
+                setInterval(() => {
+                    if (blurTimeout == null) {
+                        if (intervalTimeout != null) clearTimeout(intervalTimeout)
+                        return resolve()
+                    }
+                }, 10)
+                intervalTimeout = setTimeout(() => {
+                    resolve()
+                }, 1000)
+            })
+        }
         await fetch(`${publicUrl}/api/boardId/${boardId}`, {
             headers: {
                 'Content-Type': 'application/json'
