@@ -40,11 +40,16 @@ export function startAlertCron() {
         const currentTime = getTime(new Date())
         const alertList = await getAlert()
         for (const el of alertList) {
-            if(el.scheduleEnableWeekdayOnly && !isWeekday()) continue;
-            if(el.scheduleEnableNotHoliday &&  await isHoliday()) continue;
+            const isNotifyTime = currentTime === el.notifyTime.substring(0,5)
+            const isScheduleTime = currentTime === el.scheduleTime.substring(0,5)
 
-            if(currentTime === el.notifyTime.substring(0,5)) void processNotify(el);
-            if(currentTime === el.scheduleTime.substring(0,5)) void processSchedule(el);
+            if(isNotifyTime || isScheduleTime) {
+                if(el.scheduleEnableWeekdayOnly && !isWeekday()) continue;
+                if(el.scheduleEnableNotHoliday &&  await isHoliday()) continue;
+            }
+
+            if(isNotifyTime) void processNotify(el);
+            if(isScheduleTime) void processSchedule(el);
         }
     });
 }
