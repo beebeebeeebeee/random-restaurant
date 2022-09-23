@@ -33,10 +33,14 @@ ViewRouter.get("/config/alertId/:alertId",
  */
 async function getRandomRestaurantByRequest(req): Promise<[RestaurantType[], string]> {
     const {boardId, seed} = req.params
-    const {times} = req.query as {
-        times?: string
+    const query = req.query as {
+        times?: string,
+        people?: string
     }
-    const [restaurantList, indexes] = await getRandomRestaurant(boardId, seed, true, times != null ? parseInt(times) : undefined)
+    const times = query.times != null ? parseInt(query.times) : undefined
+    const people = query.people != null ? parseInt(query.people) : undefined
+
+    const [restaurantList, indexes] = await getRandomRestaurant(boardId, seed, true, times, people)
     return [restaurantList, indexes.map(index => restaurantList[index]?.restaurant).join(', ')]
 }
 

@@ -2,9 +2,18 @@ import {RestaurantType} from "../type";
 import {getRestaurantList} from "../database";
 import * as seedrandom from "seedrandom";
 
-export async function getRandomRestaurant(boardId: string, seed: string, isWeighted: boolean = true, times: number = 1): Promise<[RestaurantType[], number[]]> {
-    const restaurantList = await getRestaurantList(boardId)
-    if (restaurantList.length == 0) return [[], [0]]
+/**
+ * Get Random Restaurant by params
+ * @param boardId
+ * @param seed
+ * @param isWeighted
+ * @param times
+ * @param people
+ */
+export async function getRandomRestaurant(boardId: string, seed: string, isWeighted: boolean = true, times: number = 1, people = 0): Promise<[RestaurantType[], number[]]> {
+    const originalRestaurantList = (await getRestaurantList(boardId))
+    const filteredRestaurantList = originalRestaurantList.filter(el => el.peopleLimit === -1 || el.peopleLimit >= people)
+    if (filteredRestaurantList.length == 0) return [originalRestaurantList, []]
 
     // construct random method with seed
     const random = seedrandom(seed)
@@ -12,14 +21,14 @@ export async function getRandomRestaurant(boardId: string, seed: string, isWeigh
     // assign random method by isWeighted flag
     let randomMethod: (randomNumber: number) => number
     if (isWeighted) {
-        const total = restaurantList.reduce((p, c) => p + c.weight, 0)
-        const cdf = restaurantList.map(e => e.weight).map((sum => value => sum += value / total)(0))
+        const total = filteredRestaurantList.reduce((p, c) => p + c.weight, 0)
+        const cdf = filteredRestaurantList.map(e => e.weight).map((sum => value => sum += value / total)(0))
         randomMethod = (randomNumber: number) => cdf.filter(el => randomNumber >= el).length
     } else {
-        randomMethod = (randomNumber: number) => Math.floor(randomNumber * restaurantList.length)
+        randomMethod = (randomNumber: number) => Math.floor(randomNumber * filteredRestaurantList.length)
     }
 
-    if (times >= restaurantList.length) return [restaurantList, Array.from({length: restaurantList.length}).map((e_, i) => i)]
+    if (times >= filteredRestaurantList.length) return [filteredRestaurantList, Array.from({length: filteredRestaurantList.length}).map((e_, i) => i)]
 
     const indexes = Array.from<number>({length: times}).reduce((previousValue: number[]) => {
         while (true) {
@@ -30,5 +39,5 @@ export async function getRandomRestaurant(boardId: string, seed: string, isWeigh
         }
     }, [])
 
-    return [restaurantList, indexes]
+    return [originalRestaurantList, indexes]
 }
