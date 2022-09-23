@@ -13,7 +13,7 @@ async function processNotify(el: AlertType) {
     console.log(new Date(), "processNotify schedule job start", getTime(new Date()))
 
     await sendTeamsMessage(
-        `Random process will start at ${el.scheduleTime.substring(0,5)}`,
+        `Random process will start at ${el.scheduleTime.substring(0, 5)}`,
         null,
         `${domain}${publicUrl}/config/alertId/${el.id}`,
         `username: ${process.env.BASIC_AUTH_USER}; ` +
@@ -21,19 +21,26 @@ async function processNotify(el: AlertType) {
     )
 }
 
-async function processSchedule(el: AlertType) {
+async function processSchedule(alertPayload: AlertType) {
     console.log(new Date(), "processSchedule schedule job start", getTime(new Date()))
 
     const seed = Math.random().toString().slice(2)
-    const [restaurantList, indexes] = await getRandomRestaurant(el.boardId.toString(), seed, true, el.numberOfRandom)
+    const [restaurantList, indexes] = await getRandomRestaurant(alertPayload.boardId.toString(), seed, true, alertPayload.numberOfRandom, alertPayload.dailyPeopleSize)
     const restaurantResultList = indexes.map(index => restaurantList[index].restaurant).join(', ')
 
-    const query = `${el.numberOfRandom == null || el.numberOfRandom == 1 ? '' : `times=${el.numberOfRandom}`}`
+    const query = Object
+        .entries({
+            times: alertPayload.numberOfRandom,
+            people: alertPayload.dailyPeopleSize
+        })
+        .map(([k, v]) => v == null ? null : `${k}=${v}`)
+        .filter(el => el != null)
+        .join('&')
 
     await sendTeamsMessage(
         `Today's restaurant: ${restaurantResultList}`,
-        `${domain}${publicUrl}/image/boardId/${el.boardId}/seed/${seed}${query == '' ? '' : `/${query}`}`,
-        `${domain}${publicUrl}/boardId/${el.boardId}/seed/${seed}${query == '' ? '' : `?${query}`}`
+        `${domain}${publicUrl}/image/boardId/${alertPayload.boardId}/seed/${seed}${query == '' ? '' : `/${query}`}`,
+        `${domain}${publicUrl}/boardId/${alertPayload.boardId}/seed/${seed}${query == '' ? '' : `?${query}`}`
     )
 }
 
@@ -41,17 +48,17 @@ export function startAlertCron() {
     cron.schedule('*/1 * * * *', async () => {
         const currentTime = getTime(new Date())
         const alertList = await getAlert()
-        for (const el of alertList) {
-            const isNotifyTime = currentTime === el.notifyTime.substring(0, 5)
-            const isScheduleTime = currentTime === el.scheduleTime.substring(0, 5)
+        for (const eachAlertPayload of alertList) {
+            const isNotifyTime = currentTime === eachAlertPayload.notifyTime.substring(0, 5)
+            const isScheduleTime = currentTime === eachAlertPayload.scheduleTime.substring(0, 5)
 
             if (isNotifyTime || isScheduleTime) {
-                if (el.scheduleEnableWeekdayOnly && !isWeekday()) continue;
-                if (el.scheduleEnableNotHoliday && await isHoliday()) continue;
+                if (eachAlertPayload.scheduleEnableWeekdayOnly && !isWeekday()) continue;
+                if (eachAlertPayload.scheduleEnableNotHoliday && await isHoliday()) continue;
             }
 
-            if (isNotifyTime) void processNotify(el);
-            if (isScheduleTime) void processSchedule(el);
+            if (isNotifyTime) void processNotify(eachAlertPayload);
+            if (isScheduleTime) void processSchedule(eachAlertPayload);
         }
     });
 }
