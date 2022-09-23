@@ -22,6 +22,12 @@
             border: none;
             background: transparent;
         }
+
+        span.percentage {
+            margin-left: .5rem;
+            font-size: 0.5rem;
+            color: #a1a1a1;
+        }
     </style>
 </head>
 <body>
@@ -121,12 +127,14 @@
     }
 
     function displayRestaurantTable(id) {
+        const totalWeight = restaurantList.reduce((pv, cv) => pv + cv.weight, 0)
+
         if (id == null) {
             const ele = document.querySelector('#tbody')
             ele.innerHTML = [...restaurantList.map(e => `
                 <tr>${[...Object.entries(e).map(([k, v]) => {
                 if (!['restaurant', 'weight', 'peopleLimit'].includes(k)) return
-                return `<input value="${v}" onclick="restaurantTableOnEdit(${e.id})" onblur="inputBlur(${e.id})" id="${e.id}-${k}"/>`
+                return `<input value="${v}" onclick="restaurantTableOnEdit(${e.id})" onblur="inputBlur(${e.id})" id="${e.id}-${k}"/>${k == 'weight' ? `<span class='percentage' id='${e.id}-percentage'>${(Math.round(v / totalWeight * 10000) / 100).toFixed(2).padStart(5,' ')}%</span>` : ''}`
             }).filter(e => e != null), `
                 <button type="button" class="btn btn-danger btn-sm" onclick="removeRestaurant(${e.id})">
                     <i class="bi bi-trash3-fill"></i>
@@ -146,6 +154,10 @@
             document.getElementById(`${id}-restaurant`).value = restaurant.restaurant
             document.getElementById(`${id}-weight`).value = restaurant.weight
             document.getElementById(`${id}-peopleLimit`).value = restaurant.peopleLimit
+
+            restaurantList.forEach((el)=>{
+                document.getElementById(`${el.id}-percentage`).innerHTML = (Math.round(el.weight / totalWeight * 10000) / 100).toFixed(2).padStart(5,' ') + "%"
+            })
         }
     }
 
