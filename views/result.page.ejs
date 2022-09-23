@@ -31,6 +31,12 @@
             border: none;
             background: transparent;
         }
+
+        span.percentage {
+            margin-left: .5rem;
+            font-size: 0.5rem;
+            color: #a1a1a1;
+        }
     </style>
 </head>
 <body>
@@ -45,16 +51,20 @@
 
     function displayRestaurantTable() {
         const ele = document.querySelector('#tbody')
+        const totalWeight = restaurantList.reduce((pv, cv) => pv + cv.weight, 0)
         ele.innerHTML = restaurantList.map(e =>
             `<tr>${Object.entries(e)
                 .map(([k, v]) => {
                     if (!['restaurant', 'weight', 'peopleLimit'].includes(k)) return
+                    if ('weight' === k) return v + `<span class='percentage'>${(Math.round(v / totalWeight * 10000) / 100).toFixed(2).padStart(5,' ')}%</span>`
                     return v
                 })
                 .filter(e => e != null)
                 .map(k => `<td>${k}</td>`)
                 .join('')}</tr>`)
             .join('')
+
+
     }
 
     document.addEventListener("DOMContentLoaded", () => {
