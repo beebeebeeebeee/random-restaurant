@@ -12,9 +12,9 @@
     <meta name="twitter:description" content="Today's restaurant: <%- restaurant %>">
 
     <meta property="og:image"
-          content="<%- publicUrl %>/image/boardId/<%- boardId %>/seed/<%- seed %>/<%- search.replace('?','') %>">
+          content="<%- publicUrl %>/image/boardId/<%- boardId %>/seed/<%- seed %>/<%- search.replace('?', '') %>">
     <meta name="twitter:image"
-          content="<%- publicUrl %>/image/boardId/<%- boardId %>/seed/<%- seed %>/<%- search.replace('?','') %>">
+          content="<%- publicUrl %>/image/boardId/<%- boardId %>/seed/<%- seed %>/<%- search.replace('?', '') %>">
     <link rel="icon" type="image/x-icon" href="<%- image %>">
 
     <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -43,140 +43,23 @@
         window.location.href = `${publicUrl || ''}/boardId/${boardId}/seed/${Math.random().toString().slice(2)}${window.location.search}`
     }
 
-    let restaurantTableOnEditId
-    let isRestaurantTableInputFocusOut = false
-
-    function restaurantTableOnEdit(id) {
-        isRestaurantTableInputFocusOut = false
-        // first calling method
-        if (restaurantTableOnEditId == null) {
-            restaurantTableOnEditId = id
-            return
-        }
-
-        // same row, no action
-        if (restaurantTableOnEditId == id) {
-            return;
-        }
-
-        // different row, save changes
-        if (restaurantTableOnEditId != id) {
-
-            updateRestaurant(restaurantTableOnEditId, {
-                restaurant: document.getElementById(`${restaurantTableOnEditId}-restaurant`).value,
-                weight: document.getElementById(`${restaurantTableOnEditId}-weight`).value,
-                peopleLimit: document.getElementById(`${restaurantTableOnEditId}-peopleLimit`).value
-            })
-            restaurantTableOnEditId = id
-        }
-    }
-
-    let blurTimeout
-
-    function inputBlur(id) {
-        isRestaurantTableInputFocusOut = true
-        if (blurTimeout != null) clearTimeout(blurTimeout)
-        blurTimeout = setTimeout(async () => {
-            if (isRestaurantTableInputFocusOut) {
-                restaurantTableOnEditId = null
-                await updateRestaurant(id, {
-                    restaurant: document.getElementById(`${id}-restaurant`).value,
-                    weight: document.getElementById(`${id}-weight`).value,
-                    peopleLimit: document.getElementById(`${id}-peopleLimit`).value
+    function displayRestaurantTable() {
+        const ele = document.querySelector('#tbody')
+        ele.innerHTML = restaurantList.map(e =>
+            `<tr>${Object.entries(e)
+                .map(([k, v]) => {
+                    if (!['restaurant', 'weight', 'peopleLimit'].includes(k)) return
+                    return v
                 })
-
-                clearTimeout(blurTimeout)
-                blurTimeout = null
-            }
-        }, 500)
+                .filter(e => e != null)
+                .map(k => `<td>${k}</td>`)
+                .join('')}</tr>`)
+            .join('')
     }
 
-    function updateRestaurantTable(id) {
-        if (id == null) {
-            const ele = document.querySelector('#tbody')
-            ele.innerHTML = [...restaurantList.map(e => `
-                <tr>${[...Object.entries(e).map(([k, v]) => {
-                if (!['restaurant', 'weight', 'peopleLimit'].includes(k)) return
-                return `<input value="${v}" onclick="restaurantTableOnEdit(${e.id})" onblur="inputBlur(${e.id})" id="${e.id}-${k}"/>`
-            }).filter(e => e != null), `
-                <button type="button" class="btn btn-danger btn-sm" onclick="removeRestaurant(${e.id})">
-                    <i class="bi bi-trash3-fill"></i>
-                </button>
-            `].map(k => `<td>${k}</td>`).join('')}</tr>`), `
-                    <tr>
-                        <td colspan="4">
-                            <button onclick="addRestaurant()" type="button" class="btn btn-primary">
-                                <i class="bi bi-plus"></i>
-                            </button>
-                        </td>
-                    </tr>
-            `].join('')
-        } else {
-            const restaurant = restaurantList.find(e => e.id == id)
-
-            document.getElementById(`${id}-restaurant`).value = restaurant.restaurant
-            document.getElementById(`${id}-weight`).value = restaurant.weight
-            document.getElementById(`${id}-peopleLimit`).value = restaurant.peopleLimit
-        }
-    }
-
-    async function readRestaurantListAndUpdateTable(id) {
-        restaurantList = await fetch(`${publicUrl}/api/boardId/${boardId}`).then(res => res.json())
-        updateRestaurantTable(id)
-    }
-
-    async function addRestaurant() {
-        if (blurTimeout != null) {
-            await new Promise((resolve) => {
-                let intervalTimeout
-                setInterval(() => {
-                    if (blurTimeout == null) {
-                        if (intervalTimeout != null) clearTimeout(intervalTimeout)
-                        return resolve()
-                    }
-                }, 10)
-                intervalTimeout = setTimeout(() => {
-                    resolve()
-                }, 1000)
-            })
-        }
-        await fetch(`${publicUrl}/api/boardId/${boardId}`, {
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            method: "POST",
-            body: JSON.stringify({
-                boardId: boardId,
-                restaurant: "",
-                weight: "",
-                peopleLimit: -1
-            })
-        })
-        await readRestaurantListAndUpdateTable()
-    }
-
-    async function updateRestaurant(id, payload) {
-        await fetch(`${publicUrl}/api/id/${id}`, {
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            method: "PATCH",
-            body: JSON.stringify({boardId, ...payload})
-        })
-        await readRestaurantListAndUpdateTable(id)
-    }
-
-    async function removeRestaurant(id) {
-        await fetch(`${publicUrl}/api/id/${id}`, {
-            method: "DELETE"
-        })
-        await readRestaurantListAndUpdateTable()
-    }
-
-    document.addEventListener('DOMContentLoaded', () => {
-        updateRestaurantTable()
+    document.addEventListener("DOMContentLoaded", () => {
+        displayRestaurantTable()
     })
-
 </script>
 
 <div class="container text-center">
@@ -210,9 +93,6 @@
                     </th>
                     <th>
                         People Limit
-                    </th>
-                    <th>
-                        Action
                     </th>
                 </tr>
                 </thead>
