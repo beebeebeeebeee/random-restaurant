@@ -1,8 +1,8 @@
 import * as express from 'express'
 import {generateImage} from "../util";
-import {getRandomRestaurant} from "../service";
+import {getRandomRestaurant, getAlertById} from "../service";
 import {RestaurantType} from "../type";
-import {getAlertById} from "../service/alert.service";
+import * as basicAuth from 'express-basic-auth'
 
 const domain = process.env.DOMAIN || ''
 const publicUrl = process.env.PUBLIC_URL || ''
@@ -12,14 +12,20 @@ ViewRouter.get("/", (req, res) => {
     return res.redirect(`${domain}${publicUrl}/boardId/1/seed/${Math.random().toString().slice(2)}`)
 })
 
-ViewRouter.get("/config/alertId/:alertId", async (req, res)=>{
-    const {alertId} = req.params
-    const result = await getAlertById(alertId)
-    return res.render('config.alert.page.ejs', {
-        publicUrl,
-        result
-    });
-})
+ViewRouter.get("/config/alertId/:alertId",
+    basicAuth({
+        users: {[process.env.BASIC_AUTH_USER]: process.env.BASIC_AUTH_PASSWORD},
+        challenge: true,
+        realm: process.env.BASIC_AUTH_REALM,
+    }),
+    async (req, res) => {
+        const {alertId} = req.params
+        const result = await getAlertById(alertId)
+        return res.render('config.alert.page.ejs', {
+            publicUrl,
+            result
+        });
+    })
 
 /**
  * Get Random Restaurant By Request for getting image or page by boardId and seed
@@ -34,7 +40,7 @@ async function getRandomRestaurantByRequest(req): Promise<[RestaurantType[], str
     return [restaurantList, indexes.map(index => restaurantList[index]?.restaurant).join(', ')]
 }
 
-async function routeImage(req, res){
+async function routeImage(req, res) {
     const query = req.params.query || ''
     req.query = Object.fromEntries(query.split('&').map((el: string) => el.split("=")))
     const [_, restaurantResultList] = await getRandomRestaurantByRequest(req)

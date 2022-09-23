@@ -13,9 +13,11 @@ async function processNotify(el: AlertType) {
     console.log(new Date(), "processNotify schedule job start", getTime(new Date()))
 
     await sendTeamsMessage(
-        `Random process will start at ${el.scheduleTime}.`,
+        `Random process will start at ${el.scheduleTime.substring(0,5)}`,
         null,
-        `${domain}${publicUrl}/config/alertId/${el.id}`
+        `${domain}${publicUrl}/config/alertId/${el.id}`,
+        `username: ${process.env.BASIC_AUTH_USER}; ` +
+        `password: ${process.env.BASIC_AUTH_PASSWORD}`
     )
 }
 
@@ -29,7 +31,7 @@ async function processSchedule(el: AlertType) {
     const query = `${el.numberOfRandom == null || el.numberOfRandom == 1 ? '' : `times=${el.numberOfRandom}`}`
 
     await sendTeamsMessage(
-        restaurantResultList,
+        `Today's restaurant: ${restaurantResultList}`,
         `${domain}${publicUrl}/image/boardId/${el.boardId}/seed/${seed}${query == '' ? '' : `/${query}`}`,
         `${domain}${publicUrl}/boardId/${el.boardId}/seed/${seed}${query == '' ? '' : `?${query}`}`
     )
@@ -40,16 +42,16 @@ export function startAlertCron() {
         const currentTime = getTime(new Date())
         const alertList = await getAlert()
         for (const el of alertList) {
-            const isNotifyTime = currentTime === el.notifyTime.substring(0,5)
-            const isScheduleTime = currentTime === el.scheduleTime.substring(0,5)
+            const isNotifyTime = currentTime === el.notifyTime.substring(0, 5)
+            const isScheduleTime = currentTime === el.scheduleTime.substring(0, 5)
 
-            if(isNotifyTime || isScheduleTime) {
-                if(el.scheduleEnableWeekdayOnly && !isWeekday()) continue;
-                if(el.scheduleEnableNotHoliday &&  await isHoliday()) continue;
+            if (isNotifyTime || isScheduleTime) {
+                if (el.scheduleEnableWeekdayOnly && !isWeekday()) continue;
+                if (el.scheduleEnableNotHoliday && await isHoliday()) continue;
             }
 
-            if(isNotifyTime) void processNotify(el);
-            if(isScheduleTime) void processSchedule(el);
+            if (isNotifyTime) void processNotify(el);
+            if (isScheduleTime) void processSchedule(el);
         }
     });
 }
