@@ -13,7 +13,7 @@ import * as seedrandom from "seedrandom";
 export async function getRandomRestaurant(boardId: string, seed: string, isWeighted: boolean = true, times: number = 1, people = 0): Promise<[RestaurantType[], number[]]> {
     const originalRestaurantList = (await getRestaurantList(boardId))
     const filteredRestaurantList = originalRestaurantList.filter(el => el.peopleLimit === -1 || el.peopleLimit >= people)
-    if (filteredRestaurantList.length == 0) return [originalRestaurantList, []]
+    if (filteredRestaurantList.length == 0) return [filteredRestaurantList, []]
 
     // construct random method with seed
     const random = seedrandom(seed)
@@ -39,5 +39,5 @@ export async function getRandomRestaurant(boardId: string, seed: string, isWeigh
         }
     }, [])
 
-    return [originalRestaurantList, indexes]
+    return [filteredRestaurantList, indexes]
 }

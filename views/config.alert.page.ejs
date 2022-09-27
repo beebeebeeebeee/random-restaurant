@@ -181,13 +181,13 @@
                 }, 1000)
             })
         }
-        await fetch(`${publicUrl}/api/boardId/${boardId}`, {
+        await fetch(`${publicUrl}/api/boardId/${result.boardId}`, {
             headers: {
                 'Content-Type': 'application/json'
             },
             method: "POST",
             body: JSON.stringify({
-                boardId: boardId,
+                boardId: result.boardId,
                 restaurant: "",
                 weight: "",
                 peopleLimit: -1
@@ -202,7 +202,7 @@
                 'Content-Type': 'application/json'
             },
             method: "PATCH",
-            body: JSON.stringify({boardId, ...payload})
+            body: JSON.stringify({boardId: result.boardId, ...payload})
         })
         await readRestaurantListAndUpdateTable(id)
     }
