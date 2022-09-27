@@ -20,7 +20,7 @@ const alertModalRepository = AppDataSource.getRepository(AlertModal)
 
 
 export async function getRestaurantList(boardId: string): Promise<RestaurantType[]> {
-    if(!Number(boardId)) return []
+    if (!Number(boardId)) return []
     return await restaurantModalRepository.find({
         where: {
             boardId: Number(boardId)
@@ -33,16 +33,19 @@ export async function createRestaurant(payload: RestaurantType): Promise<boolean
 }
 
 export async function updateRestaurant(id: string, payload: RestaurantType): Promise<boolean> {
-    return await restaurantModalRepository.save(payload) != null
+    if (!Number(id)) return false
+    return await restaurantModalRepository.update({
+        id: Number(id)
+    }, payload) != null
 }
 
 export async function deleteRestaurant(id: string): Promise<boolean> {
-    if(!Number(id)) return false
+    if (!Number(id)) return false
     return await restaurantModalRepository.delete(Number(id)) != null
 }
 
 export async function getAlert(id?: string): Promise<AlertType[]> {
-    if(!Number(id)) return []
+    if (!Number(id)) return []
     return await alertModalRepository.find({
         where: {
             id: Number(id)
@@ -55,5 +58,8 @@ export async function createAlert(payload: AlertType): Promise<boolean> {
 }
 
 export async function updateAlert(id: string, payload: AlertType): Promise<boolean> {
-    return await alertModalRepository.save(payload) != null
+    if (!Number(id)) return false
+    return await alertModalRepository.update({
+        id: Number(id)
+    }, payload) != null
 }
