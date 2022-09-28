@@ -64,7 +64,7 @@ ApiRouter.post('/boardId/:boardId', async (req, res) => {
  */
 ApiRouter.get('/boardId/:boardId', async (req, res) => {
     const {boardId} = req.params
-    return res.send(await getRestaurantList(boardId))
+    return res.send(await getRestaurantList(boardId, new Date()))
 })
 
 /**

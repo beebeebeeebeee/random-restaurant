@@ -1,7 +1,7 @@
 import {Column, Entity, PrimaryColumn} from "typeorm";
 
 @Entity("ALERT_DB")
-export class AlertModal {
+export class AlertModel {
 
     @PrimaryColumn({name: 'id'})
     id: number

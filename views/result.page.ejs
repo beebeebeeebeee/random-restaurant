@@ -12,9 +12,9 @@
     <meta name="twitter:description" content="Today's restaurant: <%- restaurant %>">
 
     <meta property="og:image"
-          content="<%- publicUrl %>/image/boardId/<%- boardId %>/seed/<%- seed %>/<%- search.replace('?', '') %>">
+          content="<%- publicUrl %>/image/boardId/<%- boardId %>/seed/<%- seed %>/timestamp/<%- timestamp %>/<%- search.replace('?', '') %>">
     <meta name="twitter:image"
-          content="<%- publicUrl %>/image/boardId/<%- boardId %>/seed/<%- seed %>/<%- search.replace('?', '') %>">
+          content="<%- publicUrl %>/image/boardId/<%- boardId %>/seed/<%- seed %>/timestamp/<%- timestamp %>/<%- search.replace('?', '') %>">
     <link rel="icon" type="image/x-icon" href="<%- image %>">
 
     <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -46,7 +46,7 @@
     let restaurantList = <%- JSON.stringify(restaurantList) %>;
 
     function redraw() {
-        window.location.href = `${publicUrl || ''}/boardId/${boardId}/seed/${Math.random().toString().slice(2)}${window.location.search}`
+        window.location.href = `${publicUrl || ''}/boardId/${boardId}/seed/${Math.random().toString().slice(2)}/timestamp/${+new Date()}${window.location.search}`
     }
 
     function displayRestaurantTable() {

@@ -51,7 +51,7 @@
         result = await fetch(`${publicUrl}/api/alertId/${alertId}`).then(res => res.json())
     }
 
-    async function getNewConfigAndDisplayConfigTable(){
+    async function getNewConfigAndDisplayConfigTable() {
         await apiGetConfig()
         await readRestaurantListAndUpdateTable()
         displayConfigTable()
@@ -81,7 +81,7 @@
     let restaurantTableOnEditId
     let isRestaurantTableInputFocusOut = false
 
-    function restaurantTableOnEdit(id) {
+    function restaurantTableOnEdit({id, displayId}) {
         isRestaurantTableInputFocusOut = false
         // first calling method
         if (restaurantTableOnEditId == null) {
@@ -96,11 +96,10 @@
 
         // different row, save changes
         if (restaurantTableOnEditId != id) {
-
             updateRestaurant(restaurantTableOnEditId, {
-                restaurant: document.getElementById(`${restaurantTableOnEditId}-restaurant`).value,
-                weight: document.getElementById(`${restaurantTableOnEditId}-weight`).value,
-                peopleLimit: document.getElementById(`${restaurantTableOnEditId}-peopleLimit`).value
+                restaurant: document.getElementById(`${displayId}-restaurant`).value,
+                weight: document.getElementById(`${displayId}-weight`).value,
+                peopleLimit: document.getElementById(`${displayId}-peopleLimit`).value
             })
             restaurantTableOnEditId = id
         }
@@ -108,16 +107,16 @@
 
     let blurTimeout
 
-    function inputBlur(id) {
+    function inputBlur({id, displayId}) {
         isRestaurantTableInputFocusOut = true
         if (blurTimeout != null) clearTimeout(blurTimeout)
         blurTimeout = setTimeout(async () => {
             if (isRestaurantTableInputFocusOut) {
                 restaurantTableOnEditId = null
-                await updateRestaurant(id, {
-                    restaurant: document.getElementById(`${id}-restaurant`).value,
-                    weight: document.getElementById(`${id}-weight`).value,
-                    peopleLimit: document.getElementById(`${id}-peopleLimit`).value
+                await updateRestaurant({id, displayId}, {
+                    restaurant: document.getElementById(`${displayId}-restaurant`).value,
+                    weight: document.getElementById(`${displayId}-weight`).value,
+                    peopleLimit: document.getElementById(`${displayId}-peopleLimit`).value
                 })
 
                 clearTimeout(blurTimeout)
@@ -126,15 +125,15 @@
         }, 500)
     }
 
-    function displayRestaurantTable(id) {
+    function displayRestaurantTable(params) {
         const totalWeight = restaurantList.reduce((pv, cv) => pv + cv.weight, 0)
 
-        if (id == null) {
+        if (params == null) {
             const ele = document.querySelector('#tbody')
             ele.innerHTML = [...restaurantList.map(e => `
                 <tr>${[...Object.entries(e).map(([k, v]) => {
                 if (!['restaurant', 'weight', 'peopleLimit'].includes(k)) return
-                return `<input value="${v}" onclick="restaurantTableOnEdit(${e.id})" onblur="inputBlur(${e.id})" id="${e.id}-${k}"/>${k == 'weight' ? `<span class='percentage' id='${e.id}-percentage'>${(Math.round(v / totalWeight * 10000) / 100).toFixed(2).padStart(5,' ')}%</span>` : ''}`
+                return `<input value="${v}" onclick="restaurantTableOnEdit({id: ${e.id}, displayId: ${e.displayId}})" onblur="inputBlur({id: ${e.id}, displayId: ${e.displayId}})" id="${e.displayId}-${k}"/>${k == 'weight' ? `<span class='percentage' id='${e.displayId}-percentage'>${(Math.round(v / totalWeight * 10000) / 100).toFixed(2).padStart(5, ' ')}%</span>` : ''}`
             }).filter(e => e != null), `
                 <button type="button" class="btn btn-danger btn-sm" onclick="removeRestaurant(${e.id})">
                     <i class="bi bi-trash3-fill"></i>
@@ -149,21 +148,26 @@
                     </tr>
             `].join('')
         } else {
-            const restaurant = restaurantList.find(e => e.id == id)
+            const restaurant = restaurantList.find(e => e.displayId == params.displayId)
 
-            document.getElementById(`${id}-restaurant`).value = restaurant.restaurant
-            document.getElementById(`${id}-weight`).value = restaurant.weight
-            document.getElementById(`${id}-peopleLimit`).value = restaurant.peopleLimit
+            document.getElementById(`${restaurant.displayId}-restaurant`).value = restaurant.restaurant
+            document.getElementById(`${restaurant.displayId}-weight`).value = restaurant.weight
+            document.getElementById(`${restaurant.displayId}-peopleLimit`).value = restaurant.peopleLimit
+            for (const key of ['restaurant', 'weight', 'peopleLimit']) {
+                const ele = document.getElementById(`${restaurant.displayId}-${key}`)
+                ele.onclick = () => restaurantTableOnEdit({id: restaurant.id, displayId: restaurant.displayId})
+                ele.onblur = () => inputBlur({id: restaurant.id, displayId: restaurant.displayId})
+            }
 
-            restaurantList.forEach((el)=>{
-                document.getElementById(`${el.id}-percentage`).innerHTML = (Math.round(el.weight / totalWeight * 10000) / 100).toFixed(2).padStart(5,' ') + "%"
+            restaurantList.forEach((el) => {
+                document.getElementById(`${el.displayId}-percentage`).innerHTML = (Math.round(el.weight / totalWeight * 10000) / 100).toFixed(2).padStart(5, ' ') + "%"
             })
         }
     }
 
-    async function readRestaurantListAndUpdateTable(id) {
+    async function readRestaurantListAndUpdateTable(params) {
         restaurantList = await fetch(`${publicUrl}/api/boardId/${result.boardId}`).then(res => res.json())
-        displayRestaurantTable(id)
+        displayRestaurantTable(params)
     }
 
     async function addRestaurant() {
@@ -196,15 +200,15 @@
         await readRestaurantListAndUpdateTable()
     }
 
-    async function updateRestaurant(id, payload) {
-        await fetch(`${publicUrl}/api/id/${id}`, {
+    async function updateRestaurant(params, payload) {
+        await fetch(`${publicUrl}/api/id/${params.id}`, {
             headers: {
                 'Content-Type': 'application/json'
             },
             method: "PATCH",
             body: JSON.stringify({boardId: result.boardId, ...payload})
         })
-        await readRestaurantListAndUpdateTable(id)
+        await readRestaurantListAndUpdateTable(params)
     }
 
     async function removeRestaurant(id) {
@@ -241,11 +245,13 @@
                 </div>
                 <div class="form-group">
                     <label for="dailyPeopleSize">Daily People Size</label>
-                    <input type="number" class="form-control" id="dailyPeopleSize" onblur="updateConfigTable('dailyPeopleSize')">
+                    <input type="number" class="form-control" id="dailyPeopleSize"
+                           onblur="updateConfigTable('dailyPeopleSize')">
                 </div>
                 <div class="form-group">
                     <label for="numberOfRandom">Number Of Random</label>
-                    <input type="number" class="form-control" id="numberOfRandom" onblur="updateConfigTable('numberOfRandom')">
+                    <input type="number" class="form-control" id="numberOfRandom"
+                           onblur="updateConfigTable('numberOfRandom')">
                 </div>
                 <div class="form-group">
                     <label for="notifyTime">Notify Time</label>
@@ -253,7 +259,8 @@
                 </div>
                 <div class="form-group">
                     <label for="scheduleTime">Schedule Time</label>
-                    <input type="time" class="form-control" id="scheduleTime" onblur="updateConfigTable('scheduleTime')">
+                    <input type="time" class="form-control" id="scheduleTime"
+                           onblur="updateConfigTable('scheduleTime')">
                 </div>
                 <div class="form-group">
                     <div class="form-check">
