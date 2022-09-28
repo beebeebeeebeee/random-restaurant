@@ -1,2 +1,2 @@
 export * from './typeorm'
-export * from './modal'
+export * from './model'

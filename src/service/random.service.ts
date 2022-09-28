@@ -10,8 +10,8 @@ import * as seedrandom from "seedrandom";
  * @param times
  * @param people
  */
-export async function getRandomRestaurant(boardId: string, seed: string, isWeighted: boolean = true, times: number = 1, people = 0): Promise<[RestaurantType[], number[]]> {
-    const originalRestaurantList = (await getRestaurantList(boardId))
+export async function getRandomRestaurant(boardId: string, seed: string, isWeighted: boolean = true, times: number = 1, people: number = 0, timestamp: Date = new Date()): Promise<[RestaurantType[], number[]]> {
+    const originalRestaurantList = (await getRestaurantList(boardId, timestamp))
     const filteredRestaurantList = originalRestaurantList.filter(el => el.peopleLimit === -1 || el.peopleLimit >= people)
     if (filteredRestaurantList.length == 0) return [filteredRestaurantList, []]
 
