@@ -9,7 +9,7 @@ const publicUrl = process.env.PUBLIC_URL || ''
 const ViewRouter = express.Router()
 
 ViewRouter.get("/", (req, res) => {
-    return res.redirect(`${domain}${publicUrl}/boardId/1/seed/${Math.random().toString().slice(2)}`)
+    return res.redirect(`${domain}${publicUrl}/boardId/1/seed/${Math.random().toString().slice(2)}/timestamp/${+new Date()}`)
 })
 
 ViewRouter.get("/config/alertId/:alertId",
@@ -32,7 +32,7 @@ ViewRouter.get("/config/alertId/:alertId",
  * @param req the express req arg
  */
 async function getRandomRestaurantByRequest(req): Promise<[RestaurantType[], string]> {
-    const {boardId, seed} = req.params
+    const {boardId, seed, timestamp} = req.params
     const query = req.query as {
         times?: string,
         people?: string
@@ -40,7 +40,7 @@ async function getRandomRestaurantByRequest(req): Promise<[RestaurantType[], str
     const times = query.times != null ? parseInt(query.times) : undefined
     const people = query.people != null ? parseInt(query.people) : undefined
 
-    const [restaurantList, indexes] = await getRandomRestaurant(boardId, seed, true, times, people)
+    const [restaurantList, indexes] = await getRandomRestaurant(boardId, seed, true, times, people, new Date(+timestamp))
     return [restaurantList, indexes.map(index => restaurantList[index]?.restaurant).join(', ')]
 }
 
@@ -57,11 +57,11 @@ async function routeImage(req, res) {
     res.end(img);
 }
 
-ViewRouter.get("/image/boardId/:boardId/seed/:seed", routeImage)
-ViewRouter.get("/image/boardId/:boardId/seed/:seed/:query", routeImage)
+ViewRouter.get("/image/boardId/:boardId/seed/:seed/timestamp/:timestamp", routeImage)
+ViewRouter.get("/image/boardId/:boardId/seed/:seed/timestamp/:timestamp/:query", routeImage)
 
-ViewRouter.get("/boardId/:boardId/seed/:seed", async (req, res) => {
-    const {boardId, seed} = req.params
+ViewRouter.get("/boardId/:boardId/seed/:seed/timestamp/:timestamp", async (req, res) => {
+    const {boardId, seed, timestamp} = req.params
     const [restaurantList, restaurantResultList] = await getRandomRestaurantByRequest(req)
 
     return res.render('result.page.ejs', {
@@ -69,6 +69,7 @@ ViewRouter.get("/boardId/:boardId/seed/:seed", async (req, res) => {
         publicUrl,
         boardId,
         seed,
+        timestamp,
         image: generateImage(restaurantResultList),
         title: `Random Restaurant! - ${restaurantResultList}`,
         restaurantList,

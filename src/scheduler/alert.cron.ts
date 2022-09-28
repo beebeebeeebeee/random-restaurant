@@ -39,8 +39,8 @@ async function processSchedule(alertPayload: AlertType) {
 
     await sendTeamsMessage(
         `Today's restaurant: ${restaurantResultList}`,
-        `${domain}${publicUrl}/image/boardId/${alertPayload.boardId}/seed/${seed}${query == '' ? '' : `/${query}`}`,
-        `${domain}${publicUrl}/boardId/${alertPayload.boardId}/seed/${seed}${query == '' ? '' : `?${query}`}`
+        `${domain}${publicUrl}/image/boardId/${alertPayload.boardId}/seed/${seed}/timestamp/${+new Date()}${query == '' ? '' : `/${query}`}`,
+        `${domain}${publicUrl}/boardId/${alertPayload.boardId}/seed/${seed}/timestamp/${+new Date()}${query == '' ? '' : `?${query}`}`
     )
 }
 
@@ -49,10 +49,11 @@ export function startAlertCron() {
         const currentTime = getTime(new Date())
         const alertList = await getAlert()
         for (const eachAlertPayload of alertList) {
-            const isNotifyTime = currentTime === eachAlertPayload.notifyTime.substring(0, 5)
-            const isScheduleTime = currentTime === eachAlertPayload.scheduleTime.substring(0, 5)
+            const isNotifyTime = currentTime === eachAlertPayload.notifyTime?.substring(0, 5)
+            const isScheduleTime = currentTime === eachAlertPayload.scheduleTime?.substring(0, 5)
 
             if (isNotifyTime || isScheduleTime) {
+                console.log(isWeekday(), await isHoliday())
                 if (eachAlertPayload.scheduleEnableWeekdayOnly && !isWeekday()) continue;
                 if (eachAlertPayload.scheduleEnableNotHoliday && await isHoliday()) continue;
             }

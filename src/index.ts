@@ -22,7 +22,7 @@ app.listen(PORT, async () => {
 
     if (process.env.NODE_ENV === "development") {
         const tunnel = await localtunnel({
-            port: PORT,
+            port: Number(PORT),
             host: 'https://lt.beebeebeeebeee.com',
             subdomain: 'random-restaurant'
         });
