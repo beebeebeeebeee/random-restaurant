@@ -44,13 +44,14 @@ async function processSchedule(alertPayload: AlertType) {
 
     let title = `<span style='font-size: 2rem; font-weight: 300'>Today's restaurant: <span style='text-decoration: underline;'>${restaurantResultList}</span></span>`
     if(currentWeather !=null){
-        title += `<br /><span style='font-size: 1.5rem; font-weight: 100'>Current ${alertPayload.district} average rainfall: ${currentWeather.avgRainfall}mm.</span>`
+        title += `<br /><span style='font-size: 1.5rem; font-weight: 100'>Current ${alertPayload.district} average rainfall: ${currentWeather.avgRainfall}mm. ${currentWeather.icon}</span>`
     }
 
     await sendTeamsMessage(
         title,
         `${domain}${publicUrl}/image/boardId/${alertPayload.boardId}/seed/${seed}/timestamp/${+new Date()}${query == '' ? '' : `/${query}`}`,
-        `${domain}${publicUrl}/boardId/${alertPayload.boardId}/seed/${seed}/timestamp/${+new Date()}${query == '' ? '' : `?${query}`}`
+        `${domain}${publicUrl}/boardId/${alertPayload.boardId}/seed/${seed}/timestamp/${+new Date()}${query == '' ? '' : `?${query}`}`,
+        currentWeather.warning.join('<br />')
     )
 }
 

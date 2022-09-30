@@ -1,4 +1,4 @@
-export interface GovWeatherApiType {
+export interface GovWeatherApiRhrreadType {
     lightning: GovWeatherApiLightningType
     rainfall: GovWeatherApiRainFallType
     icon: number[]
