@@ -2,8 +2,8 @@ import {AlertType} from "../type";
 import {createAlert, getAlert} from "../database";
 
 export async function getAlertById(id: string): Promise<AlertType> {
-   const result = await getAlert(id)
-    if(result.length == 1) return result[0]
+    const result = await getAlert(id)
+    if (result.length == 1) return result[0]
 
     const payload: AlertType = {
         id: id as any,
@@ -12,6 +12,10 @@ export async function getAlertById(id: string): Promise<AlertType> {
         numberOfRandom: 1,
         notifyTime: null,
         scheduleTime: null,
+        lat: null,
+        long: null,
+        region: null,
+        district: null,
         scheduleEnableNotHoliday: false,
         scheduleEnableWeekdayOnly: false
 

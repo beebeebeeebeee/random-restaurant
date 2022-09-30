@@ -14,6 +14,7 @@ export function generateImage(s: string): string {
         autoWrapLineHeightMultiplier: 1.2,
         marginLeft: 350,
         marginRight: 20,
+        marginBottom: 80,
         align: "left",
         valign: "middle",
         backgroundColor: "#FFFFFF",
