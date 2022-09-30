@@ -3,6 +3,7 @@ import {isHoliday, sendTeamsMessage, isWeekday, getCurrentWeather} from "../util
 import {getRandomRestaurant} from "../service";
 import {getAlert} from "../database";
 import {AlertType, CurrentWeatherType} from "../type";
+import {WeatherWarnRainIconConstant, WeatherWarnTpIconConstant} from "../constant";
 
 const domain = process.env.DOMAIN || ''
 const publicUrl = process.env.PUBLIC_URL || ''
@@ -25,7 +26,7 @@ async function processSchedule(alertPayload: AlertType) {
     console.log(new Date(), "processSchedule schedule job start", getTime(new Date()))
 
     let currentWeather: CurrentWeatherType
-    if(alertPayload.region != null && alertPayload.district != null){
+    if (alertPayload.region != null && alertPayload.district != null) {
         currentWeather = await getCurrentWeather(alertPayload.region, alertPayload.district)
     }
 
@@ -43,8 +44,14 @@ async function processSchedule(alertPayload: AlertType) {
         .join('&')
 
     let title = `<span style='font-size: 2rem; font-weight: 300'>Today's restaurant: <span style='text-decoration: underline;'>${restaurantResultList}</span></span>`
-    if(currentWeather !=null){
+    if (currentWeather != null) {
         title += `<br /><span style='font-size: 1.5rem; font-weight: 100'>Current ${alertPayload.district} average rainfall: ${currentWeather.avgRainfall}mm. ${currentWeather.icon}</span>`
+        if (currentWeather.warnRain != null) {
+            title += `<span style='font-size: 1.5rem; font-weight: 100'>${WeatherWarnRainIconConstant[currentWeather.warnRain]}</span>`
+        }
+        if (currentWeather.warnTp != null) {
+            title += `<span style='font-size: 1.5rem; font-weight: 100'>${WeatherWarnTpIconConstant[currentWeather.warnTp]}</span>`
+        }
     }
 
     await sendTeamsMessage(
