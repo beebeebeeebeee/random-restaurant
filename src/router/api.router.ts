@@ -32,6 +32,10 @@ ApiRouter.patch('/alertId/:alertId', async (req, res) => {
         numberOfRandom: req.body.numberOfRandom,
         notifyTime: req.body.notifyTime,
         scheduleTime: req.body.scheduleTime,
+        lat: req.body.lat,
+        long: req.body.long,
+        region: req.body.region,
+        district: req.body.district,
         scheduleEnableWeekdayOnly: req.body.scheduleEnableWeekdayOnly,
         scheduleEnableNotHoliday: req.body.scheduleEnableNotHoliday
 

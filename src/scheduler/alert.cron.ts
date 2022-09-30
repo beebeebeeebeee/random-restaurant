@@ -1,8 +1,8 @@
 import * as cron from 'node-cron'
-import {isHoliday, sendTeamsMessage, isWeekday} from "../util";
+import {isHoliday, sendTeamsMessage, isWeekday, getCurrentWeather} from "../util";
 import {getRandomRestaurant} from "../service";
 import {getAlert} from "../database";
-import {AlertType} from "../type";
+import {AlertType, CurrentWeatherType} from "../type";
 
 const domain = process.env.DOMAIN || ''
 const publicUrl = process.env.PUBLIC_URL || ''
@@ -16,13 +16,18 @@ async function processNotify(el: AlertType) {
         `Random process will start at ${el.scheduleTime.substring(0, 5)}`,
         null,
         `${domain}${publicUrl}/config/alertId/${el.id}`,
-        `username: ${process.env.BASIC_AUTH_USER}; ` +
+        `username: ${process.env.BASIC_AUTH_USER}<br />` +
         `password: ${process.env.BASIC_AUTH_PASSWORD}`
     )
 }
 
 async function processSchedule(alertPayload: AlertType) {
     console.log(new Date(), "processSchedule schedule job start", getTime(new Date()))
+
+    let currentWeather: CurrentWeatherType
+    if(alertPayload.region != null && alertPayload.district != null){
+        currentWeather = await getCurrentWeather(alertPayload.region, alertPayload.district)
+    }
 
     const seed = Math.random().toString().slice(2)
     const [restaurantList, indexes] = await getRandomRestaurant(alertPayload.boardId.toString(), seed, true, alertPayload.numberOfRandom, alertPayload.dailyPeopleSize)
@@ -37,8 +42,13 @@ async function processSchedule(alertPayload: AlertType) {
         .filter(el => el != null)
         .join('&')
 
+    let title = `<span style='font-size: 2rem; font-weight: 300'>Today's restaurant: <span style='text-decoration: underline;'>${restaurantResultList}</span></span>`
+    if(currentWeather !=null){
+        title += `<br /><span style='font-size: 1.5rem; font-weight: 100'>Current ${alertPayload.district} average rainfall: ${currentWeather.avgRainfall}mm.</span>`
+    }
+
     await sendTeamsMessage(
-        `Today's restaurant: ${restaurantResultList}`,
+        title,
         `${domain}${publicUrl}/image/boardId/${alertPayload.boardId}/seed/${seed}/timestamp/${+new Date()}${query == '' ? '' : `/${query}`}`,
         `${domain}${publicUrl}/boardId/${alertPayload.boardId}/seed/${seed}/timestamp/${+new Date()}${query == '' ? '' : `?${query}`}`
     )
@@ -63,4 +73,3 @@ export function startAlertCron() {
         }
     });
 }
-
