@@ -4,6 +4,7 @@ import {
     deleteRestaurant,
     getAlert,
     getRestaurantList,
+    triggerAlert,
     updateAlert,
     updateRestaurant
 } from "../database";
@@ -44,6 +45,14 @@ ApiRouter.patch('/alertId/:alertId', async (req, res) => {
 
     await updateAlert(alertId, payload)
     return res.send()
+})
+
+/**
+ * Trigger Now
+ */
+ApiRouter.post('/trigger/alertId/:alertId', async (req, res) => {
+    const {alertId} = req.params
+    await triggerAlert(alertId)
 })
 
 /**

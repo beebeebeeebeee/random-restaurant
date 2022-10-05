@@ -10,7 +10,7 @@ const publicUrl = process.env.PUBLIC_URL || ''
 
 const getTime = (d: Date) => `${d.getHours().toString().padStart(2, '0')}:${d.getMinutes().toString().padStart(2, '0')}`
 
-async function processNotify(el: AlertType) {
+export async function processNotify(el: AlertType) {
     console.log(new Date(), "processNotify schedule job start", getTime(new Date()))
 
     await sendTeamsMessage(
@@ -22,7 +22,7 @@ async function processNotify(el: AlertType) {
     )
 }
 
-async function processSchedule(alertPayload: AlertType) {
+export async function processSchedule(alertPayload: AlertType) {
     console.log(new Date(), "processSchedule schedule job start", getTime(new Date()))
 
     let currentWeather: CurrentWeatherType
