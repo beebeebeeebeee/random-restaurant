@@ -4,6 +4,7 @@ import {
     deleteRestaurant,
     getAlert,
     getRestaurantList,
+    triggerAlert,
     updateAlert,
     updateRestaurant
 } from "../database";
@@ -32,6 +33,10 @@ ApiRouter.patch('/alertId/:alertId', async (req, res) => {
         numberOfRandom: req.body.numberOfRandom,
         notifyTime: req.body.notifyTime,
         scheduleTime: req.body.scheduleTime,
+        lat: req.body.lat,
+        long: req.body.long,
+        region: req.body.region,
+        district: req.body.district,
         scheduleEnableWeekdayOnly: req.body.scheduleEnableWeekdayOnly,
         scheduleEnableNotHoliday: req.body.scheduleEnableNotHoliday
 
@@ -40,6 +45,14 @@ ApiRouter.patch('/alertId/:alertId', async (req, res) => {
 
     await updateAlert(alertId, payload)
     return res.send()
+})
+
+/**
+ * Trigger Now
+ */
+ApiRouter.post('/trigger/alertId/:alertId', async (req, res) => {
+    const {alertId} = req.params
+    await triggerAlert(alertId)
 })
 
 /**

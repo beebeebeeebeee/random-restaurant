@@ -15,6 +15,18 @@ export class AlertModel {
     @Column({name: 'number_of_random', nullable: false, default: 1})
     numberOfRandom: number
 
+    @Column({name: 'lat', nullable: true})
+    lat?: number
+
+    @Column({name: 'long', nullable: true})
+    long?: number
+
+    @Column({name: 'region', nullable: true})
+    region?: string
+
+    @Column({name: 'district', nullable: true})
+    district?: string
+
     @Column({name: 'notify_time', nullable: true})
     notifyTime?: string
 

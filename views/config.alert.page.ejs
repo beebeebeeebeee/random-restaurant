@@ -28,6 +28,12 @@
             font-size: 0.5rem;
             color: #a1a1a1;
         }
+
+        .row > .col,
+        .row > .col-3{
+            padding-left: 0;
+            padding-right: 0;
+        }
     </style>
 </head>
 <body>
@@ -43,6 +49,10 @@
         document.getElementById('numberOfRandom').value = result.numberOfRandom
         document.getElementById('notifyTime').value = result.notifyTime?.substring(0, 5) || ''
         document.getElementById('scheduleTime').value = result.scheduleTime?.substring(0, 5) || ''
+        document.getElementById('lat').value = result.lat
+        document.getElementById('long').value = result.long
+        document.getElementById('region').value = result.region
+        document.getElementById('district').value = result.district
         document.getElementById('scheduleEnableWeekdayOnly').checked = result.scheduleEnableWeekdayOnly
         document.getElementById('scheduleEnableNotHoliday').checked = result.scheduleEnableNotHoliday
     }
@@ -65,6 +75,10 @@
             numberOfRandom: document.getElementById('numberOfRandom').value,
             notifyTime: document.getElementById('notifyTime').value == '' ? null : document.getElementById('notifyTime').value + ":00",
             scheduleTime: document.getElementById('scheduleTime').value == '' ? null : document.getElementById('scheduleTime').value + ":00",
+            lat: document.getElementById('lat').value,
+            long: document.getElementById('long').value,
+            region: document.getElementById('region').value,
+            district: document.getElementById('district').value,
             scheduleEnableWeekdayOnly: document.getElementById('scheduleEnableWeekdayOnly').checked,
             scheduleEnableNotHoliday: document.getElementById('scheduleEnableNotHoliday').checked
         }
@@ -223,6 +237,12 @@
         await readRestaurantListAndUpdateTable()
     })
 
+    async function triggerNow(){
+        await fetch(`${publicUrl}/api/trigger/alertId/${alertId}`, {
+            method: "POST"
+        })
+    }
+
 </script>
 
 <div class="container">
@@ -253,9 +273,51 @@
                     <input type="number" class="form-control" id="numberOfRandom"
                            onblur="updateConfigTable('numberOfRandom')">
                 </div>
+                <div class="row">
+                    <div class="col">
+                        <div class="form-group" style="padding-right: 0.25rem">
+                            <label for="lat">Lat</label>
+                            <input type="number" class="form-control" id="lat"
+                                   onblur="updateConfigTable('lat')">
+                        </div>
+                    </div>
+                    <div class="col">
+                        <div class="form-group" style="padding-left: 0.25rem">
+                            <label for="long">Long</label>
+                            <input type="number" class="form-control" id="long"
+                                   onblur="updateConfigTable('long')">
+                        </div>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="region">Region</label>
+                    <select class="form-select" id="region" onchange="updateConfigTable('region')">
+                        <option selected>-- Region --</option>
+                        <option value="Hong Kong and Kowloon">Hong Kong and Kowloon</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="district">District</label>
+                    <select class="form-select" id="district" onchange="updateConfigTable('district')">
+                        <option selected>-- District --</option>
+                        <option value="Wan Chai">Wan Chai</option>
+                    </select>
+                </div>
                 <div class="form-group">
                     <label for="notifyTime">Notify Time</label>
                     <input type="time" class="form-control" id="notifyTime" onblur="updateConfigTable('notifyTime')">
+                </div>
+                <div class="row">
+                    <div class="col">
+                        <div class="form-group" style="padding-right: 0.25rem">
+                            <label for="scheduleTime">Schedule Time</label>
+                            <input type="time" class="form-control" id="scheduleTime"
+                                   onblur="updateConfigTable('scheduleTime')">
+                        </div>
+                    </div>
+                    <div class="col-3" style="margin-top: 1.5rem;">
+                        <button class="btn btn-secondary" style="width: 100%;" onclick="triggerNow()">Trigger</button>
+                    </div>
                 </div>
                 <div class="form-group">
                     <label for="scheduleTime">Schedule Time</label>
