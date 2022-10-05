@@ -29,7 +29,8 @@
             color: #a1a1a1;
         }
 
-        .row > .col {
+        .row > .col,
+        .row > .col-3{
             padding-left: 0;
             padding-right: 0;
         }
@@ -236,6 +237,12 @@
         await readRestaurantListAndUpdateTable()
     })
 
+    async function triggerNow(){
+        await fetch(`${publicUrl}/api/trigger/alertId/${alertId}`, {
+            method: "POST"
+        })
+    }
+
 </script>
 
 <div class="container">
@@ -299,6 +306,18 @@
                 <div class="form-group">
                     <label for="notifyTime">Notify Time</label>
                     <input type="time" class="form-control" id="notifyTime" onblur="updateConfigTable('notifyTime')">
+                </div>
+                <div class="row">
+                    <div class="col">
+                        <div class="form-group" style="padding-right: 0.25rem">
+                            <label for="scheduleTime">Schedule Time</label>
+                            <input type="time" class="form-control" id="scheduleTime"
+                                   onblur="updateConfigTable('scheduleTime')">
+                        </div>
+                    </div>
+                    <div class="col-3" style="margin-top: 1.5rem;">
+                        <button class="btn btn-secondary" style="width: 100%;" onclick="triggerNow()">Trigger</button>
+                    </div>
                 </div>
                 <div class="form-group">
                     <label for="scheduleTime">Schedule Time</label>

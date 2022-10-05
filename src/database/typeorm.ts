@@ -1,6 +1,7 @@
 import {DataSource, Equal, IsNull, LessThan, MoreThan, Not} from "typeorm";
 import {AlertModel, RestaurantModel} from "./model";
 import {AlertType, RestaurantType} from "../type";
+import {processSchedule} from "../scheduler";
 
 export const AppDataSource = new DataSource({
     type: "sqlite",
@@ -88,4 +89,18 @@ export async function updateAlert(id: string, payload: AlertType): Promise<boole
     return await alertModelRepository.update({
         id: Number(id)
     }, payload) != null
+}
+
+export async function triggerAlert(id: string): Promise<boolean> {
+    if (!Number(id)) return false
+
+    const payload = await alertModelRepository.findOne({
+        where: {
+            id: Number(id)
+        }
+    })
+    if(payload == null) return false
+
+    await processSchedule(payload)
+    return true
 }
