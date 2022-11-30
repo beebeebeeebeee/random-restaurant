@@ -1,5 +1,5 @@
 import * as cron from 'node-cron'
-import {isHoliday, sendTeamsMessage, isWeekday, getCurrentWeather} from "../util";
+import {isHoliday, sendTeamsMessage, isWeekday, getCurrentWeather, sendSlackMessage} from "../util";
 import {getRandomRestaurant} from "../service";
 import {getAlert} from "../database";
 import {AlertType, CurrentWeatherType} from "../type";
@@ -43,41 +43,56 @@ export async function processSchedule(alertPayload: AlertType) {
         .filter(el => el != null)
         .join('&')
 
-    let title = `<span style='font-size: 2rem; font-weight: 300'>Today's restaurant: <span style='text-decoration: underline;'>${restaurantResultList}</span></span>`
+    let title = `Today's restaurant: ${restaurantResultList}`
+    let subTitle = []
     if (currentWeather != null) {
-        title += `<br /><span style='font-size: 1.5rem; font-weight: 100'>Current ${alertPayload.district} average rainfall: ${currentWeather.avgRainfall}mm. ${currentWeather.icon}</span>`
+        subTitle.push(`Current ${alertPayload.district} average rainfall: ${currentWeather.avgRainfall}mm. ${currentWeather.icon}`)
         if (currentWeather.warnRain != null) {
-            title += `<span style='font-size: 1.5rem; font-weight: 100'>${WeatherWarnRainIconConstant[currentWeather.warnRain]}</span>`
+            subTitle.push(WeatherWarnRainIconConstant[currentWeather.warnRain])
         }
         if (currentWeather.warnTp != null) {
-            title += `<span style='font-size: 1.5rem; font-weight: 100'>${WeatherWarnTpIconConstant[currentWeather.warnTp]}</span>`
+            subTitle.push(WeatherWarnTpIconConstant[currentWeather.warnTp])
         }
     }
 
     await sendTeamsMessage(
         title,
+        subTitle,
         `${domain}${publicUrl}/image/boardId/${alertPayload.boardId}/seed/${seed}/timestamp/${+new Date()}${query == '' ? '' : `/${query}`}`,
         `${domain}${publicUrl}/boardId/${alertPayload.boardId}/seed/${seed}/timestamp/${+new Date()}${query == '' ? '' : `?${query}`}`,
-        currentWeather.warning.join('<br />')
+        currentWeather?.warning
+    )
+    await sendSlackMessage(
+        title,
+        subTitle,
+        `${domain}${publicUrl}/image/boardId/${alertPayload.boardId}/seed/${seed}/timestamp/${+new Date()}${query == '' ? '' : `/${query}`}`,
+        `${domain}${publicUrl}/boardId/${alertPayload.boardId}/seed/${seed}/timestamp/${+new Date()}${query == '' ? '' : `?${query}`}`,
+        currentWeather?.warning
     )
 }
 
 export function startAlertCron() {
     cron.schedule('*/1 * * * *', async () => {
-        const currentTime = getTime(new Date())
-        const alertList = await getAlert()
-        for (const eachAlertPayload of alertList) {
-            const isNotifyTime = currentTime === eachAlertPayload.notifyTime?.substring(0, 5)
-            const isScheduleTime = currentTime === eachAlertPayload.scheduleTime?.substring(0, 5)
+        try {
+            const currentTime = getTime(new Date())
+            const alertList = await getAlert()
+            for (const eachAlertPayload of alertList) {
+                const isNotifyTime = currentTime === eachAlertPayload.notifyTime?.substring(0, 5)
+                const isScheduleTime = currentTime === eachAlertPayload.scheduleTime?.substring(0, 5)
 
-            if (isNotifyTime || isScheduleTime) {
-                console.log(isWeekday(), await isHoliday())
-                if (eachAlertPayload.scheduleEnableWeekdayOnly && !isWeekday()) continue;
-                if (eachAlertPayload.scheduleEnableNotHoliday && await isHoliday()) continue;
+                if (isNotifyTime || isScheduleTime) {
+                    console.log(isWeekday(), await isHoliday())
+                    if (eachAlertPayload.scheduleEnableWeekdayOnly && !isWeekday()) continue;
+                    if (eachAlertPayload.scheduleEnableNotHoliday && await isHoliday()) continue;
+                }
+
+                let promises = []
+                if (isNotifyTime) promises.push(processNotify(eachAlertPayload));
+                if (isScheduleTime) promises.push(processSchedule(eachAlertPayload));
+                await Promise.all(promises)
             }
-
-            if (isNotifyTime) void processNotify(eachAlertPayload);
-            if (isScheduleTime) void processSchedule(eachAlertPayload);
+        } catch (error) {
+            console.error(error)
         }
     });
 }
