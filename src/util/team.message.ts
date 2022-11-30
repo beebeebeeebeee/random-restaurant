@@ -10,7 +10,7 @@ export async function sendTeamsMessage(title: string, subTitle: Array<string>, i
             {
                 "contentType": "application/vnd.microsoft.card.hero",
                 "content": {
-                    title: `<span style='font-size: 2rem; font-weight: 300'>{title}</span>${subTitle.length > 0 ? '<br/>' + subTitle.map(e => `<span style='font-size: 1.5rem; font-weight: 100'>${e}</span>`).join('') : ''}`,
+                    title: `<span style='font-size: 2rem; font-weight: 300'>${title}</span>${subTitle.length > 0 ? '<br/>' + subTitle.map(e => `<span style='font-size: 1.5rem; font-weight: 100'>${e}</span>`).join('') : ''}`,
                     text: text === undefined ? undefined : text.join('<br/>'),
                     "images": imageUrl == null ? [] : [
                         {
