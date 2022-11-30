@@ -1,4 +1,5 @@
 export * from './condition'
 export * from './generate.image'
 export * from './team.message'
+export * from './slack.message'
 export * from './get.current.weather'
