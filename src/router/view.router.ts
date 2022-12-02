@@ -46,7 +46,7 @@ async function getRandomRestaurantByRequest(req): Promise<[RestaurantType[], str
 
 async function routeImage(req, res) {
     const query = req.params.query || ''
-    req.query = Object.fromEntries(query.split('&').map((el: string) => el.split("=")))
+    req.query = Object.fromEntries(query.replace(/&amp;/g, '&').split('&').map((el: string) => el.split("=")))
     const [_, restaurantResultList] = await getRandomRestaurantByRequest(req)
 
     const img = Buffer.from(generateImage(restaurantResultList).split(',')[1], 'base64');
