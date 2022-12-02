@@ -3,7 +3,7 @@ import axios from "axios";
 const slackUrl = process.env.SLACK_URL
 
 export async function sendSlackMessage(title: string, subTitle: Array<string>, imageUrl: string, pageUrl: string, text?: Array<string>) {
-    if (slackUrl.length === 0) return
+    if (slackUrl == null) return
     const data = {
         "blocks": [
             {
