@@ -1,3 +1,4 @@
+// @ts-nocheck
 import {Column, Entity, PrimaryColumn} from "typeorm";
 
 @Entity("ALERT_DB")

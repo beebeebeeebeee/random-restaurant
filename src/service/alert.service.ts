@@ -10,12 +10,12 @@ export async function getAlertById(id: string): Promise<AlertType> {
         boardId: 1,
         dailyPeopleSize: 0,
         numberOfRandom: 1,
-        notifyTime: null,
-        scheduleTime: null,
-        lat: null,
-        long: null,
-        region: null,
-        district: null,
+        notifyTime: undefined,
+        scheduleTime: undefined,
+        lat: undefined,
+        long: undefined,
+        region: undefined,
+        district: undefined,
         scheduleEnableNotHoliday: false,
         scheduleEnableWeekdayOnly: false
 

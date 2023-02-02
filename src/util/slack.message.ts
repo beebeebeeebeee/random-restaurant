@@ -1,8 +1,9 @@
 import axios from "axios";
+import {Config} from "../config";
 
-const slackUrl = process.env.SLACK_URL
+const {slackUrl} = Config
 
-export async function sendSlackMessage(title: string, subTitle: Array<string>, imageUrl: string, pageUrl: string, text?: Array<string>) {
+export async function sendSlackMessage(title: string, subTitle: Array<string>, imageUrl: string | null, pageUrl: string, text?: Array<string>) {
     if (slackUrl == null) return
     const data = {
         "blocks": [
@@ -13,15 +14,14 @@ export async function sendSlackMessage(title: string, subTitle: Array<string>, i
                     "text": title
                 }
             },
-            {
+            ...subTitle.length > 0 ? [{
                 "type": "section",
                 "text": {
                     "type": "mrkdwn",
                     "text": subTitle.join('')
                 }
-            },
-
-            {
+            }] : [],
+            ...imageUrl ? [{
                 "type": "image",
                 "title": {
                     "type": "plain_text",
@@ -30,7 +30,7 @@ export async function sendSlackMessage(title: string, subTitle: Array<string>, i
                 },
                 "image_url": imageUrl,
                 "alt_text": "image1"
-            },
+            }] : [],
             {
                 "type": "actions",
                 "elements": [
@@ -47,7 +47,7 @@ export async function sendSlackMessage(title: string, subTitle: Array<string>, i
                     }
                 ]
             },
-            ...text === undefined ? [] : text.map(each=>({
+            ...text === undefined ? [] : text.map(each => ({
                 "type": "section",
                 "text": {
                     "type": "mrkdwn",
@@ -56,8 +56,10 @@ export async function sendSlackMessage(title: string, subTitle: Array<string>, i
             })),
         ]
     }
-    try{
+    try {
         const result = await axios.post(slackUrl, data)
 
-    }catch (e){console.error(e)}
+    } catch (e) {
+        console.error(e)
+    }
 }

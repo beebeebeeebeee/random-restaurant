@@ -1,8 +1,9 @@
 import axios from "axios";
+import {Config} from "../config";
 
-const teamsUrl = process.env.TEAMS_URL
+const {teamsUrl} = Config
 
-export async function sendTeamsMessage(title: string, subTitle: Array<string>, imageUrl: string, pageUrl: string, text?: Array<string>) {
+export async function sendTeamsMessage(title: string, subTitle: Array<string>, imageUrl: string | null, pageUrl: string, text?: Array<string>) {
     if (teamsUrl == null) return
     const data = {
         "type": "message",

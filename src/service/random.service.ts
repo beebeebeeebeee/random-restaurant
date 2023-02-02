@@ -12,7 +12,7 @@ import * as seedrandom from "seedrandom";
  */
 export async function getRandomRestaurant(boardId: string, seed: string, isWeighted: boolean = true, times: number = 1, people: number = 0, timestamp: Date = new Date()): Promise<[RestaurantType[], number[]]> {
     const originalRestaurantList = (await getRestaurantList(boardId, timestamp))
-    const filteredRestaurantList = originalRestaurantList.filter(el => el.peopleLimit === -1 || el.peopleLimit >= people)
+    const filteredRestaurantList = originalRestaurantList.filter(el => el.peopleLimit === -1 || (el.peopleLimit ?? -1) >= people)
     if (filteredRestaurantList.length == 0) return [filteredRestaurantList, []]
 
     // construct random method with seed

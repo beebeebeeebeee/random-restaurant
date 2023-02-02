@@ -1,0 +1,25 @@
+.row {
+    margin: 1rem 0;
+}
+
+.form-group {
+    margin-bottom: 1rem;
+}
+
+#tbody input {
+    width: 15vw;
+    border: none;
+    background: transparent;
+}
+
+span.percentage {
+    margin-left: .5rem;
+    font-size: 0.5rem;
+    color: #a1a1a1;
+}
+
+.row > .col,
+.row > .col-3{
+    padding-left: 0;
+    padding-right: 0;
+}
