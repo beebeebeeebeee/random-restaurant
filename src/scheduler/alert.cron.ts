@@ -1,31 +1,53 @@
 import * as cron from 'node-cron'
-import {isHoliday, sendTeamsMessage, isWeekday, getCurrentWeather, sendSlackMessage} from "../util";
+import {isHoliday, sendTeamsMessage, isWeekday, getCurrentWeather, sendSlackMessage, stringUtil} from "../util";
 import {getRandomRestaurant} from "../service";
 import {getAlert} from "../database";
 import {AlertType, CurrentWeatherType} from "../type";
-import {WeatherWarnRainIconConstant, WeatherWarnTpIconConstant} from "../constant";
+import {ViewEndpointConstant, WeatherWarnRainIconConstant, WeatherWarnTpIconConstant} from "../constant";
+import {Config} from "../config";
+import {getLogger} from "log4js";
 
-const domain = process.env.DOMAIN || ''
-const publicUrl = process.env.PUBLIC_URL || ''
+const {domain, publicUrl} = Config
+const logger = getLogger()
 
 const getTime = (d: Date) => `${d.getHours().toString().padStart(2, '0')}:${d.getMinutes().toString().padStart(2, '0')}`
 
 export async function processNotify(el: AlertType) {
-    console.log(new Date(), "processNotify schedule job start", getTime(new Date()))
+    logger.info("processNotify schedule job start")
 
-    await sendTeamsMessage(
-        `Random process will start at ${el.scheduleTime.substring(0, 5)}`,
-        null,
-        `${domain}${publicUrl}/config/alertId/${el.id}`,
-        `username: ${process.env.BASIC_AUTH_USER}<br />` +
-        `password: ${process.env.BASIC_AUTH_PASSWORD}`
-    )
+    try {
+        await sendTeamsMessage(
+            `Random process will start at ${el.scheduleTime?.substring(0, 5)}`,
+            [],
+            null,
+            stringUtil.replaceUrlParams(ViewEndpointConstant.ALERT_VIEW, {
+                alertId: el.id
+            }, `${domain}${publicUrl}`),
+            [`username: ${Config.basicAuthUser}<br />password: ${Config.basicAuthPassword}`]
+        )
+    } catch (error) {
+        logger.error('processNotify send teams message error:', error)
+    }
+
+    try {
+        await sendSlackMessage(
+            `Random process will start at ${el.scheduleTime?.substring(0, 5)}`,
+            [],
+            null,
+            stringUtil.replaceUrlParams(ViewEndpointConstant.ALERT_VIEW, {
+                alertId: el.id
+            }, `${domain}${publicUrl}`),
+            [`username: ${Config.basicAuthUser}`, `password: ${Config.basicAuthPassword}`]
+        )
+    } catch (error) {
+        logger.error('processNotify send slack message error:', error)
+    }
 }
 
 export async function processSchedule(alertPayload: AlertType) {
-    console.log(new Date(), "processSchedule schedule job start", getTime(new Date()))
+    logger.info("processSchedule schedule job start")
 
-    let currentWeather: CurrentWeatherType
+    let currentWeather: CurrentWeatherType | undefined = undefined
     if (alertPayload.region != null && alertPayload.district != null) {
         currentWeather = await getCurrentWeather(alertPayload.region, alertPayload.district)
     }
@@ -45,7 +67,7 @@ export async function processSchedule(alertPayload: AlertType) {
 
     let title = `Today's restaurant: ${restaurantResultList}`
     let subTitle = []
-    if (currentWeather != null) {
+    if (currentWeather !== undefined) {
         subTitle.push(`Current ${alertPayload.district} average rainfall: ${currentWeather.avgRainfall}mm. ${currentWeather.icon}`)
         if (currentWeather.warnRain != null) {
             subTitle.push(WeatherWarnRainIconConstant[currentWeather.warnRain])
@@ -55,20 +77,29 @@ export async function processSchedule(alertPayload: AlertType) {
         }
     }
 
-    await sendTeamsMessage(
-        title,
-        subTitle,
-        `${domain}${publicUrl}/image/boardId/${alertPayload.boardId}/seed/${seed}/timestamp/${+new Date()}${query == '' ? '' : `/${query}`}`,
-        `${domain}${publicUrl}/boardId/${alertPayload.boardId}/seed/${seed}/timestamp/${+new Date()}${query == '' ? '' : `?${query}`}`,
-        currentWeather?.warning
-    )
-    await sendSlackMessage(
-        title,
-        subTitle,
-        `${domain}${publicUrl}/image/boardId/${alertPayload.boardId}/seed/${seed}/timestamp/${+new Date()}${query == '' ? '' : `/${query}`}`,
-        `${domain}${publicUrl}/boardId/${alertPayload.boardId}/seed/${seed}/timestamp/${+new Date()}${query == '' ? '' : `?${query}`}`,
-        currentWeather?.warning
-    )
+    try {
+        await sendTeamsMessage(
+            title,
+            subTitle,
+            `${domain}${publicUrl}/image/boardId/${alertPayload.boardId}/seed/${seed}/timestamp/${+new Date()}${query == '' ? '' : `/${query}`}`,
+            `${domain}${publicUrl}/boardId/${alertPayload.boardId}/seed/${seed}/timestamp/${+new Date()}${query == '' ? '' : `?${query}`}`,
+            currentWeather?.warning
+        )
+    } catch (error) {
+        logger.error('processSchedule send teams message error:', error)
+    }
+
+    try {
+        await sendSlackMessage(
+            title,
+            subTitle,
+            `${domain}${publicUrl}/image/boardId/${alertPayload.boardId}/seed/${seed}/timestamp/${+new Date()}${query == '' ? '' : `/${query}`}`,
+            `${domain}${publicUrl}/boardId/${alertPayload.boardId}/seed/${seed}/timestamp/${+new Date()}${query == '' ? '' : `?${query}`}`,
+            currentWeather?.warning
+        )
+    } catch (error) {
+        logger.error('processSchedule send slack message error:', error)
+    }
 }
 
 export function startAlertCron() {
@@ -81,7 +112,6 @@ export function startAlertCron() {
                 const isScheduleTime = currentTime === eachAlertPayload.scheduleTime?.substring(0, 5)
 
                 if (isNotifyTime || isScheduleTime) {
-                    console.log(isWeekday(), await isHoliday())
                     if (eachAlertPayload.scheduleEnableWeekdayOnly && !isWeekday()) continue;
                     if (eachAlertPayload.scheduleEnableNotHoliday && await isHoliday()) continue;
                 }
@@ -92,7 +122,7 @@ export function startAlertCron() {
                 await Promise.all(promises)
             }
         } catch (error) {
-            console.error(error)
+            logger.error(error)
         }
     });
 }

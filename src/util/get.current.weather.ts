@@ -6,16 +6,31 @@ import {WeatherIconConstant} from "../constant";
 const apiUrl = "https://data.weather.gov.hk/weatherAPI/opendata/weather.php"
 
 export async function getCurrentWeather(region: string, district: string): Promise<CurrentWeatherType> {
-    const rhrreadData: GovWeatherApiRhrreadType = (await axios.get(`${apiUrl}?dataType=rhrread&lang=en`)).data
+    const rhrreadData: GovWeatherApiRhrreadType = (await axios.get(apiUrl, {
+        params: {
+            dataType: 'rhrread',
+            lang: 'en'
+        }
+    })).data
     const isLightning = rhrreadData.lightning?.data.find(e => e.place === region)?.occur === 'true'
     const rainfall = rhrreadData.rainfall?.data.find(e => e.place === district)
-    const avgRainfall = (rainfall?.min || 0 + rainfall?.max || 0) / 2
+    const avgRainfall = ((rainfall?.min ?? 0) + (rainfall?.max ?? 0)) / 2
     const icon = rhrreadData.icon.map(e => WeatherIconConstant[e]).join('')
 
-    const warningInfoData: GovWeatherApiWarningInfoType = (await axios.get(`${apiUrl}?dataType=warningInfo&lang=en`)).data
+    const warningInfoData: GovWeatherApiWarningInfoType = (await axios.get(apiUrl, {
+        params: {
+            dataType: 'warningInfo',
+            lang: 'en'
+        }
+    })).data
     const warning = warningInfoData.details?.map(e => e.contents[0]) || []
 
-    const warnsumData = (await axios.get(`${apiUrl}?dataType=warnsum&lang=en`)).data
+    const warnsumData = (await axios.get(apiUrl, {
+        params: {
+            dataType: 'warnsum',
+            lang: 'en'
+        }
+    })).data
     const warnRain: GovWeatherApiWarnsumType<'WRAIN'>[keyof GovWeatherApiWarnsumType<'WRAIN'>] | undefined = warnsumData.WRAIN
     const warnTp: GovWeatherApiWarnsumType<'WTCSGNL'>[keyof GovWeatherApiWarnsumType<'WTCSGNL'>] | undefined = warnsumData.WTCSGNL
 

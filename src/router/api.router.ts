@@ -9,14 +9,14 @@ import {
     updateRestaurant
 } from "../database";
 import {AlertType} from "../type";
+import {ApiEndpointConstant} from "../constant";
 
 const ApiRouter = express.Router()
-
 
 /**
  * Get Alert
  */
-ApiRouter.get('/alertId/:alertId', async (req, res) => {
+ApiRouter.get(ApiEndpointConstant.ALERT_GET, async (req, res) => {
     const {alertId} = req.params
     return res.send((await getAlert(alertId))[0])
 })
@@ -24,7 +24,7 @@ ApiRouter.get('/alertId/:alertId', async (req, res) => {
 /**
  * Update Alert
  */
-ApiRouter.patch('/alertId/:alertId', async (req, res) => {
+ApiRouter.patch(ApiEndpointConstant.ALERT_UPDATE, async (req, res) => {
     const {alertId} = req.params
     const payload: AlertType = {
         id: alertId as any,
@@ -50,7 +50,7 @@ ApiRouter.patch('/alertId/:alertId', async (req, res) => {
 /**
  * Trigger Now
  */
-ApiRouter.post('/trigger/alertId/:alertId', async (req, res) => {
+ApiRouter.post(ApiEndpointConstant.ALERT_TRIGGER, async (req, res) => {
     const {alertId} = req.params
     await triggerAlert(alertId)
 })
@@ -58,7 +58,7 @@ ApiRouter.post('/trigger/alertId/:alertId', async (req, res) => {
 /**
  * Add New Restaurant
  */
-ApiRouter.post('/boardId/:boardId', async (req, res) => {
+ApiRouter.post(ApiEndpointConstant.BOARD_CREATE, async (req, res) => {
     const {boardId} = req.params
     const payload = {
         boardId: req.body.boardId,
@@ -75,32 +75,15 @@ ApiRouter.post('/boardId/:boardId', async (req, res) => {
 /**
  * Get All Restaurant
  */
-ApiRouter.get('/boardId/:boardId', async (req, res) => {
+ApiRouter.get(ApiEndpointConstant.BOARD_GET, async (req, res) => {
     const {boardId} = req.params
     return res.send(await getRestaurantList(boardId, new Date()))
 })
 
 /**
- * Add New Restaurant
- */
-ApiRouter.post('/boardId/:boardId', async (req, res) => {
-    const {boardId} = req.params
-    const payload = {
-        boardId: req.body.boardId,
-        restaurant: req.body.restaurant,
-        weight: req.body.weight,
-        peopleLimit: req.body.peopleLimit
-    }
-    if (payload.boardId == null || payload.restaurant == null || payload.weight == null) return res.status(400).send()
-
-    await createRestaurant(payload)
-    return res.send()
-})
-
-/**
  * Update Restaurant
  */
-ApiRouter.patch('/id/:id', async (req, res) => {
+ApiRouter.patch(ApiEndpointConstant.RESTAURANT_UPDATE, async (req, res) => {
     const {id} = req.params
     const payload = {
         boardId: req.body.boardId,
@@ -117,7 +100,7 @@ ApiRouter.patch('/id/:id', async (req, res) => {
 /**
  * Delete Restaurant
  */
-ApiRouter.delete('/id/:id', async (req, res) => {
+ApiRouter.delete(ApiEndpointConstant.RESTAURANT_DELETE, async (req, res) => {
     const {id} = req.params
     await deleteRestaurant(id)
     return res.send()
