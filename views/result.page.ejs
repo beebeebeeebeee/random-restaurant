@@ -1,121 +1,72 @@
 <html>
-<head>
-    <meta charset="utf-8">
-
-    <title><%- title %></title>
-
-    <meta property="og:title" content="<%- title %>">
-    <meta name="twitter:title" content="<%- title %>">
-
-    <meta name="description" content="Today's restaurant: <%- restaurant %>">
-    <meta property="og:description" content="Today's restaurant: <%- restaurant %>">
-    <meta name="twitter:description" content="Today's restaurant: <%- restaurant %>">
-
-    <meta property="og:image"
-          content="<%- publicUrl %>/image/boardId/<%- boardId %>/seed/<%- seed %>/timestamp/<%- timestamp %>/<%- search.replace('?', '') %>">
-    <meta name="twitter:image"
-          content="<%- publicUrl %>/image/boardId/<%- boardId %>/seed/<%- seed %>/timestamp/<%- timestamp %>/<%- search.replace('?', '') %>">
-    <link rel="icon" type="image/x-icon" href="<%- image %>">
-
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.1/dist/css/bootstrap.min.css" rel="stylesheet"
-          integrity="sha384-iYQeCzEYFbKjA/T2uDLTpkwGzCiq6soy8tYaI1GyVh/UjpbCx/TYkiZhlZB6+fzT" crossorigin="anonymous">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.9.1/font/bootstrap-icons.css">
-    <style>
-        .row {
-            margin: 1rem 0;
-        }
-
-        input {
-            width: 15vw;
-            border: none;
-            background: transparent;
-        }
-
-        span.percentage {
-            margin-left: .5rem;
-            font-size: 0.5rem;
-            color: #a1a1a1;
-        }
-    </style>
-</head>
-<body>
-<script>
-    const publicUrl = '<%- publicUrl %>'
-    const boardId = '<%- boardId %>'
-    let restaurantList = <%- JSON.stringify(restaurantList) %>;
-
-    function redraw() {
-        window.location.href = `${publicUrl || ''}/boardId/${boardId}/seed/${Math.random().toString().slice(2)}/timestamp/${+new Date()}${window.location.search}`
-    }
-
-    function displayRestaurantTable() {
-        const ele = document.querySelector('#tbody')
-        const totalWeight = restaurantList.reduce((pv, cv) => pv + cv.weight, 0)
-        ele.innerHTML = restaurantList.map(e =>
-            `<tr>${Object.entries(e)
-                .map(([k, v]) => {
-                    if (!['restaurant', 'weight', 'peopleLimit'].includes(k)) return
-                    if ('weight' === k) return v + `<span class='percentage'>${(Math.round(v / totalWeight * 10000) / 100).toFixed(2).padStart(5,' ')}%</span>`
-                    return v
-                })
-                .filter(e => e != null)
-                .map(k => `<td>${k}</td>`)
-                .join('')}</tr>`)
-            .join('')
-
-
-    }
-
-    document.addEventListener("DOMContentLoaded", () => {
-        displayRestaurantTable()
-    })
-</script>
-
-<div class="container text-center">
-    <div class="row">
-        <div class="col">
-            <button onclick="redraw()" type="button" class="btn btn-primary" style="width: 100%">
-                Re-Draw!
-            </button>
-        </div>
-    </div>
-    <div class="row">
-        <div class="col">
-            <div class="card">
-                <div class="card-body">
-                    <h5 class="card-title">Today's restaurant:</h5>
-                    <p class="card-text"><%- restaurant %></p>
+    <head>
+        <meta charset="utf-8">
+        <title><%- title %></title>
+        <meta property="og:title" content="<%- title %>">
+        <meta name="twitter:title" content="<%- title %>">
+        <meta name="description" content="Today's restaurant: <%- restaurant %>">
+        <meta property="og:description" content="Today's restaurant: <%- restaurant %>">
+        <meta name="twitter:description" content="Today's restaurant: <%- restaurant %>">
+        <meta property="og:image"
+              content="<%- publicUrl %>/image/boardId/<%- boardId %>/seed/<%- seed %>/timestamp/<%- timestamp %>/<%- search.replace('?', '') %>">
+        <meta name="twitter:image"
+              content="<%- publicUrl %>/image/boardId/<%- boardId %>/seed/<%- seed %>/timestamp/<%- timestamp %>/<%- search.replace('?', '') %>">
+        <link rel="icon" type="image/x-icon" href="<%- image %>">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.1/dist/css/bootstrap.min.css" rel="stylesheet"
+              integrity="sha384-iYQeCzEYFbKjA/T2uDLTpkwGzCiq6soy8tYaI1GyVh/UjpbCx/TYkiZhlZB6+fzT" crossorigin="anonymous">
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.9.1/font/bootstrap-icons.css">
+        <link rel="stylesheet" href="<%- publicUrl %>/public/result-page/style.css">
+    </head>
+    <body>
+        <div class="container text-center">
+            <div class="row">
+                <div class="col">
+                    <button onclick="redraw()" type="button" class="btn btn-primary" style="width: 100%">
+                        Re-Draw!
+                    </button>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col">
+                    <div class="card">
+                        <div class="card-body">
+                            <h5 class="card-title">Today's restaurant:</h5>
+                            <p class="card-text"><%- restaurant %></p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col">
+                    <table class="table table-hover">
+                        <thead class="table-light">
+                        <tr>
+                            <th>
+                                Restaurant
+                            </th>
+                            <th>
+                                Weight
+                            </th>
+                            <th>
+                                People Limit
+                            </th>
+                        </tr>
+                        </thead>
+                        <tbody id="tbody"></tbody>
+                    </table>
                 </div>
             </div>
         </div>
-    </div>
-    <div class="row">
-        <div class="col">
-            <table class="table table-hover">
-                <thead class="table-light">
-                <tr>
-                    <th>
-                        Restaurant
-                    </th>
-                    <th>
-                        Weight
-                    </th>
-                    <th>
-                        People Limit
-                    </th>
-                </tr>
-                </thead>
-                <tbody id="tbody"></tbody>
-            </table>
-        </div>
-    </div>
 
-</div>
-
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.1/dist/js/bootstrap.bundle.min.js"
-        integrity="sha384-u1OknCvxWvY5kfmNBILK2hRnQC3Pr17a+RTT6rIHI7NnikvbZlHgTPOOmMi466C8"
-        crossorigin="anonymous"></script>
-
-</body>
+        <script>
+            const publicUrl = '<%- publicUrl %>'
+            const boardId = '<%- boardId %>'
+            let restaurantList = <%- JSON.stringify(restaurantList) %>;
+        </script>
+        <script src="<%- publicUrl %>/public/result-page/script.js" defer></script>
+        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.1/dist/js/bootstrap.bundle.min.js"
+                integrity="sha384-u1OknCvxWvY5kfmNBILK2hRnQC3Pr17a+RTT6rIHI7NnikvbZlHgTPOOmMi466C8"
+                crossorigin="anonymous"></script>
+    </body>
 </html>

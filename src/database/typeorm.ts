@@ -2,12 +2,13 @@ import {DataSource, Equal, IsNull, LessThan, MoreThan, Not} from "typeorm";
 import {AlertModel, RestaurantModel} from "./model";
 import {AlertType, RestaurantType} from "../type";
 import {processSchedule} from "../scheduler";
+import {Config} from "../config";
 
 export const AppDataSource = new DataSource({
     type: "sqlite",
     database: "data/database.db",
     synchronize: true,
-    logging: true,
+    logging: Config.nodeEnv === 'development',
     entities: [
         RestaurantModel,
         AlertModel
@@ -61,7 +62,7 @@ export async function updateRestaurant(id: string, payload: RestaurantType): Pro
         withDeleted: true,
     })
     return await restaurantModelRepository.save({
-        displayId: raw.displayId ?? Number(id),
+        displayId: raw?.displayId ?? Number(id),
         ...payload
     }) != null
 }

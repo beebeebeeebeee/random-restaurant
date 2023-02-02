@@ -1,375 +1,144 @@
 <html>
-<head>
-    <meta charset="utf-8">
+    <head>
+        <meta charset="utf-8">
+        <title>Alert Config</title>
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.1/dist/css/bootstrap.min.css" rel="stylesheet"
+              integrity="sha384-iYQeCzEYFbKjA/T2uDLTpkwGzCiq6soy8tYaI1GyVh/UjpbCx/TYkiZhlZB6+fzT" crossorigin="anonymous">
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.9.1/font/bootstrap-icons.css">
+        <link rel="stylesheet" href="<%- publicUrl %>/public/config-alert-page/style.css">
+    </head>
+    <body>
+        <div class="container">
+            <div class="row">
+                <div class="col">
+                    <div class="card text-center">
+                        <div class="card-body">
+                            <h5 class="card-title">Alert Config:</h5>
+                            <p class="card-text">Alert ID: <%- result.id %></p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col">
+                    <form>
+                        <div class="form-group">
+                            <label for="boardId">Board Id</label>
+                            <input type="number" class="form-control" id="boardId" onblur="updateConfigTable('boardId')">
+                        </div>
+                        <div class="form-group">
+                            <label for="dailyPeopleSize">Daily People Size</label>
+                            <input type="number" class="form-control" id="dailyPeopleSize"
+                                   onblur="updateConfigTable('dailyPeopleSize')">
+                        </div>
+                        <div class="form-group">
+                            <label for="numberOfRandom">Number Of Random</label>
+                            <input type="number" class="form-control" id="numberOfRandom"
+                                   onblur="updateConfigTable('numberOfRandom')">
+                        </div>
+                        <div class="row">
+                            <div class="col">
+                                <div class="form-group" style="padding-right: 0.25rem">
+                                    <label for="lat">Lat</label>
+                                    <input type="number" class="form-control" id="lat"
+                                           onblur="updateConfigTable('lat')">
+                                </div>
+                            </div>
+                            <div class="col">
+                                <div class="form-group" style="padding-left: 0.25rem">
+                                    <label for="long">Long</label>
+                                    <input type="number" class="form-control" id="long"
+                                           onblur="updateConfigTable('long')">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label for="region">Region</label>
+                            <select class="form-select" id="region" onchange="updateConfigTable('region')">
+                                <option selected>-- Region --</option>
+                                <option value="Hong Kong and Kowloon">Hong Kong and Kowloon</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="district">District</label>
+                            <select class="form-select" id="district" onchange="updateConfigTable('district')">
+                                <option selected>-- District --</option>
+                                <option value="Wan Chai">Wan Chai</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="notifyTime">Notify Time</label>
+                            <input type="time" class="form-control" id="notifyTime" onblur="updateConfigTable('notifyTime')">
+                        </div>
+                        <div class="row">
+                            <div class="col">
+                                <div class="form-group" style="padding-right: 0.25rem">
+                                    <label for="scheduleTime">Schedule Time</label>
+                                    <input type="time" class="form-control" id="scheduleTime"
+                                           onblur="updateConfigTable('scheduleTime')">
+                                </div>
+                            </div>
+                            <div class="col-3" style="margin-top: 1.5rem;">
+                                <button class="btn btn-secondary" style="width: 100%;" onclick="triggerNow()" type="button">Trigger</button>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" id="scheduleEnableWeekdayOnly"
+                                       onclick="updateConfigTable('scheduleEnableWeekdayOnly')">
+                                <label class="form-check-label" for="scheduleEnableWeekdayOnly">
+                                    Enable Weekday Only
+                                </label>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" id="scheduleEnableNotHoliday"
+                                       onclick="updateConfigTable('scheduleEnableNotHoliday')"
+                                <label class="form-check-label" for="scheduleEnableNotHoliday">
+                                    Enable Not Holiday
+                                </label>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
 
-    <title>Alert Config</title>
-
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.1/dist/css/bootstrap.min.css" rel="stylesheet"
-          integrity="sha384-iYQeCzEYFbKjA/T2uDLTpkwGzCiq6soy8tYaI1GyVh/UjpbCx/TYkiZhlZB6+fzT" crossorigin="anonymous">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.9.1/font/bootstrap-icons.css">
-    <style>
-        .row {
-            margin: 1rem 0;
-        }
-
-        .form-group {
-            margin-bottom: 1rem;
-        }
-
-        #tbody input {
-            width: 15vw;
-            border: none;
-            background: transparent;
-        }
-
-        span.percentage {
-            margin-left: .5rem;
-            font-size: 0.5rem;
-            color: #a1a1a1;
-        }
-
-        .row > .col,
-        .row > .col-3{
-            padding-left: 0;
-            padding-right: 0;
-        }
-    </style>
-</head>
-<body>
-<script>
-    const publicUrl = '<%- publicUrl %>';
-    const alertId = <%- result.id %>;
-    let result = <%- JSON.stringify(result) %>;
-    let restaurantList = []
-
-    function displayConfigTable() {
-        document.getElementById('boardId').value = result.boardId
-        document.getElementById('dailyPeopleSize').value = result.dailyPeopleSize
-        document.getElementById('numberOfRandom').value = result.numberOfRandom
-        document.getElementById('notifyTime').value = result.notifyTime?.substring(0, 5) || ''
-        document.getElementById('scheduleTime').value = result.scheduleTime?.substring(0, 5) || ''
-        document.getElementById('lat').value = result.lat
-        document.getElementById('long').value = result.long
-        document.getElementById('region').value = result.region
-        document.getElementById('district').value = result.district
-        document.getElementById('scheduleEnableWeekdayOnly').checked = result.scheduleEnableWeekdayOnly
-        document.getElementById('scheduleEnableNotHoliday').checked = result.scheduleEnableNotHoliday
-    }
-
-    async function apiGetConfig() {
-        result = await fetch(`${publicUrl}/api/alertId/${alertId}`).then(res => res.json())
-    }
-
-    async function getNewConfigAndDisplayConfigTable() {
-        await apiGetConfig()
-        await readRestaurantListAndUpdateTable()
-        displayConfigTable()
-    }
-
-    async function updateConfigTable(id) {
-        const payload = {
-            id: alertId,
-            boardId: document.getElementById('boardId').value,
-            dailyPeopleSize: document.getElementById('dailyPeopleSize').value,
-            numberOfRandom: document.getElementById('numberOfRandom').value,
-            notifyTime: document.getElementById('notifyTime').value == '' ? null : document.getElementById('notifyTime').value + ":00",
-            scheduleTime: document.getElementById('scheduleTime').value == '' ? null : document.getElementById('scheduleTime').value + ":00",
-            lat: document.getElementById('lat').value,
-            long: document.getElementById('long').value,
-            region: document.getElementById('region').value,
-            district: document.getElementById('district').value,
-            scheduleEnableWeekdayOnly: document.getElementById('scheduleEnableWeekdayOnly').checked,
-            scheduleEnableNotHoliday: document.getElementById('scheduleEnableNotHoliday').checked
-        }
-        await fetch(`${publicUrl}/api/alertId/${alertId}`, {
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            method: "PATCH",
-            body: JSON.stringify(payload)
-        })
-        await getNewConfigAndDisplayConfigTable(id)
-    }
-
-    let restaurantTableOnEditId
-    let isRestaurantTableInputFocusOut = false
-
-    function restaurantTableOnEdit({id, displayId}) {
-        isRestaurantTableInputFocusOut = false
-        // first calling method
-        if (restaurantTableOnEditId == null) {
-            restaurantTableOnEditId = id
-            return
-        }
-
-        // same row, no action
-        if (restaurantTableOnEditId == id) {
-            return;
-        }
-
-        // different row, save changes
-        if (restaurantTableOnEditId != id) {
-            updateRestaurant(restaurantTableOnEditId, {
-                restaurant: document.getElementById(`${displayId}-restaurant`).value,
-                weight: document.getElementById(`${displayId}-weight`).value,
-                peopleLimit: document.getElementById(`${displayId}-peopleLimit`).value
-            })
-            restaurantTableOnEditId = id
-        }
-    }
-
-    let blurTimeout
-
-    function inputBlur({id, displayId}) {
-        isRestaurantTableInputFocusOut = true
-        if (blurTimeout != null) clearTimeout(blurTimeout)
-        blurTimeout = setTimeout(async () => {
-            if (isRestaurantTableInputFocusOut) {
-                restaurantTableOnEditId = null
-                await updateRestaurant({id, displayId}, {
-                    restaurant: document.getElementById(`${displayId}-restaurant`).value,
-                    weight: document.getElementById(`${displayId}-weight`).value,
-                    peopleLimit: document.getElementById(`${displayId}-peopleLimit`).value
-                })
-
-                clearTimeout(blurTimeout)
-                blurTimeout = null
-            }
-        }, 500)
-    }
-
-    function displayRestaurantTable(params) {
-        const totalWeight = restaurantList.reduce((pv, cv) => pv + cv.weight, 0)
-
-        if (params == null) {
-            const ele = document.querySelector('#tbody')
-            ele.innerHTML = [...restaurantList.map(e => `
-                <tr>${[...Object.entries(e).map(([k, v]) => {
-                if (!['restaurant', 'weight', 'peopleLimit'].includes(k)) return
-                return `<input value="${v}" onclick="restaurantTableOnEdit({id: ${e.id}, displayId: ${e.displayId}})" onblur="inputBlur({id: ${e.id}, displayId: ${e.displayId}})" id="${e.displayId}-${k}"/>${k == 'weight' ? `<span class='percentage' id='${e.displayId}-percentage'>${(Math.round(v / totalWeight * 10000) / 100).toFixed(2).padStart(5, ' ')}%</span>` : ''}`
-            }).filter(e => e != null), `
-                <button type="button" class="btn btn-danger btn-sm" onclick="removeRestaurant(${e.id})">
-                    <i class="bi bi-trash3-fill"></i>
-                </button>
-            `].map(k => `<td>${k}</td>`).join('')}</tr>`), `
-                    <tr>
-                        <td colspan="4">
-                            <button onclick="addRestaurant()" type="button" class="btn btn-primary">
-                                <i class="bi bi-plus"></i>
-                            </button>
-                        </td>
-                    </tr>
-            `].join('')
-        } else {
-            const restaurant = restaurantList.find(e => e.displayId == params.displayId)
-
-            document.getElementById(`${restaurant.displayId}-restaurant`).value = restaurant.restaurant
-            document.getElementById(`${restaurant.displayId}-weight`).value = restaurant.weight
-            document.getElementById(`${restaurant.displayId}-peopleLimit`).value = restaurant.peopleLimit
-            for (const key of ['restaurant', 'weight', 'peopleLimit']) {
-                const ele = document.getElementById(`${restaurant.displayId}-${key}`)
-                ele.onclick = () => restaurantTableOnEdit({id: restaurant.id, displayId: restaurant.displayId})
-                ele.onblur = () => inputBlur({id: restaurant.id, displayId: restaurant.displayId})
-            }
-
-            restaurantList.forEach((el) => {
-                document.getElementById(`${el.displayId}-percentage`).innerHTML = (Math.round(el.weight / totalWeight * 10000) / 100).toFixed(2).padStart(5, ' ') + "%"
-            })
-        }
-    }
-
-    async function readRestaurantListAndUpdateTable(params) {
-        restaurantList = await fetch(`${publicUrl}/api/boardId/${result.boardId}`).then(res => res.json())
-        displayRestaurantTable(params)
-    }
-
-    async function addRestaurant() {
-        if (blurTimeout != null) {
-            await new Promise((resolve) => {
-                let intervalTimeout
-                setInterval(() => {
-                    if (blurTimeout == null) {
-                        if (intervalTimeout != null) clearTimeout(intervalTimeout)
-                        return resolve()
-                    }
-                }, 10)
-                intervalTimeout = setTimeout(() => {
-                    resolve()
-                }, 1000)
-            })
-        }
-        await fetch(`${publicUrl}/api/boardId/${result.boardId}`, {
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            method: "POST",
-            body: JSON.stringify({
-                boardId: result.boardId,
-                restaurant: "",
-                weight: "",
-                peopleLimit: -1
-            })
-        })
-        await readRestaurantListAndUpdateTable()
-    }
-
-    async function updateRestaurant(params, payload) {
-        await fetch(`${publicUrl}/api/id/${params.id}`, {
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            method: "PATCH",
-            body: JSON.stringify({boardId: result.boardId, ...payload})
-        })
-        await readRestaurantListAndUpdateTable(params)
-    }
-
-    async function removeRestaurant(id) {
-        await fetch(`${publicUrl}/api/id/${id}`, {
-            method: "DELETE"
-        })
-        await readRestaurantListAndUpdateTable()
-    }
-
-    document.addEventListener('DOMContentLoaded', async () => {
-        displayConfigTable()
-        await readRestaurantListAndUpdateTable()
-    })
-
-    async function triggerNow(){
-        await fetch(`${publicUrl}/api/trigger/alertId/${alertId}`, {
-            method: "POST"
-        })
-    }
-
-</script>
-
-<div class="container">
-    <div class="row">
-        <div class="col">
-            <div class="card text-center">
-                <div class="card-body">
-                    <h5 class="card-title">Alert Config:</h5>
-                    <p class="card-text">Alert ID: <%- result.id %></p>
+            <div class="row">
+                <div class="col">
+                    <table class="table table-hover">
+                        <thead class="table-light">
+                        <tr>
+                            <th>
+                                Restaurant
+                            </th>
+                            <th>
+                                Weight
+                            </th>
+                            <th>
+                                People Limit
+                            </th>
+                            <th>
+                                Action
+                            </th>
+                        </tr>
+                        </thead>
+                        <tbody id="tbody"></tbody>
+                    </table>
                 </div>
             </div>
         </div>
-    </div>
-    <div class="row">
-        <div class="col">
-            <form>
-                <div class="form-group">
-                    <label for="boardId">Board Id</label>
-                    <input type="number" class="form-control" id="boardId" onblur="updateConfigTable('boardId')">
-                </div>
-                <div class="form-group">
-                    <label for="dailyPeopleSize">Daily People Size</label>
-                    <input type="number" class="form-control" id="dailyPeopleSize"
-                           onblur="updateConfigTable('dailyPeopleSize')">
-                </div>
-                <div class="form-group">
-                    <label for="numberOfRandom">Number Of Random</label>
-                    <input type="number" class="form-control" id="numberOfRandom"
-                           onblur="updateConfigTable('numberOfRandom')">
-                </div>
-                <div class="row">
-                    <div class="col">
-                        <div class="form-group" style="padding-right: 0.25rem">
-                            <label for="lat">Lat</label>
-                            <input type="number" class="form-control" id="lat"
-                                   onblur="updateConfigTable('lat')">
-                        </div>
-                    </div>
-                    <div class="col">
-                        <div class="form-group" style="padding-left: 0.25rem">
-                            <label for="long">Long</label>
-                            <input type="number" class="form-control" id="long"
-                                   onblur="updateConfigTable('long')">
-                        </div>
-                    </div>
-                </div>
-                <div class="form-group">
-                    <label for="region">Region</label>
-                    <select class="form-select" id="region" onchange="updateConfigTable('region')">
-                        <option selected>-- Region --</option>
-                        <option value="Hong Kong and Kowloon">Hong Kong and Kowloon</option>
-                    </select>
-                </div>
-                <div class="form-group">
-                    <label for="district">District</label>
-                    <select class="form-select" id="district" onchange="updateConfigTable('district')">
-                        <option selected>-- District --</option>
-                        <option value="Wan Chai">Wan Chai</option>
-                    </select>
-                </div>
-                <div class="form-group">
-                    <label for="notifyTime">Notify Time</label>
-                    <input type="time" class="form-control" id="notifyTime" onblur="updateConfigTable('notifyTime')">
-                </div>
-                <div class="row">
-                    <div class="col">
-                        <div class="form-group" style="padding-right: 0.25rem">
-                            <label for="scheduleTime">Schedule Time</label>
-                            <input type="time" class="form-control" id="scheduleTime"
-                                   onblur="updateConfigTable('scheduleTime')">
-                        </div>
-                    </div>
-                    <div class="col-3" style="margin-top: 1.5rem;">
-                        <button class="btn btn-secondary" style="width: 100%;" onclick="triggerNow()">Trigger</button>
-                    </div>
-                </div>
-                <div class="form-group">
-                    <div class="form-check">
-                        <input class="form-check-input" type="checkbox" id="scheduleEnableWeekdayOnly"
-                               onclick="updateConfigTable('scheduleEnableWeekdayOnly')">
-                        <label class="form-check-label" for="scheduleEnableWeekdayOnly">
-                            Enable Weekday Only
-                        </label>
-                    </div>
-                </div>
-                <div class="form-group">
-                    <div class="form-check">
-                        <input class="form-check-input" type="checkbox" id="scheduleEnableNotHoliday"
-                               onclick="updateConfigTable('scheduleEnableNotHoliday')"
-                        <label class="form-check-label" for="scheduleEnableNotHoliday">
-                            Enable Not Holiday
-                        </label>
-                    </div>
-                </div>
-            </form>
-        </div>
-    </div>
 
-    <div class="row">
-        <div class="col">
-            <table class="table table-hover">
-                <thead class="table-light">
-                <tr>
-                    <th>
-                        Restaurant
-                    </th>
-                    <th>
-                        Weight
-                    </th>
-                    <th>
-                        People Limit
-                    </th>
-                    <th>
-                        Action
-                    </th>
-                </tr>
-                </thead>
-                <tbody id="tbody"></tbody>
-            </table>
-        </div>
-    </div>
-
-</div>
-
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.1/dist/js/bootstrap.bundle.min.js"
-        integrity="sha384-u1OknCvxWvY5kfmNBILK2hRnQC3Pr17a+RTT6rIHI7NnikvbZlHgTPOOmMi466C8"
-        crossorigin="anonymous"></script>
-
-</body>
+        <script>
+            const publicUrl = '<%- publicUrl %>';
+            const alertId = <%- result.id %>;
+            let result = <%- JSON.stringify(result) %>;
+            let restaurantList = []
+        </script>
+        <script src="<%- publicUrl %>/public/config-alert-page/script.js" defer></script>
+        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.1/dist/js/bootstrap.bundle.min.js"
+                integrity="sha384-u1OknCvxWvY5kfmNBILK2hRnQC3Pr17a+RTT6rIHI7NnikvbZlHgTPOOmMi466C8"
+                crossorigin="anonymous"></script>
+    </body>
 </html>

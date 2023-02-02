@@ -1,0 +1,15 @@
+.row {
+    margin: 1rem 0;
+}
+
+input {
+    width: 15vw;
+    border: none;
+    background: transparent;
+}
+
+span.percentage {
+    margin-left: .5rem;
+    font-size: 0.5rem;
+    color: #a1a1a1;
+}
